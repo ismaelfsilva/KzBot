@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Kz.ico</file>
+        <file>Kz1.ico</file>
+        <file>Tutorial/CheckAdvanced.png</file>
+        <file>Tutorial/OpenConfig.png</file>
+        <file>Kz.png</file>
+        <file>Tutorial/AssignText.png</file>
+        <file>Tutorial/ChatModeOnOff.png</file>
+        <file>Tutorial/CreateHotkey.png</file>
+        <file>Tutorial/CustomHotkeys.png</file>
+        <file>Tutorial/HotkeyConfig.png</file>
+        <file>Tutorial/OkApply.png</file>
+    </qresource>
+</RCC>

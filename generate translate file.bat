@@ -1,0 +1,1 @@
+C:\Qt\6.5.1\msvc2019_64\bin\lupdate -recursive UI -ts KzBot.ts
