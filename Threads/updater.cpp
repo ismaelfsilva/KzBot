@@ -282,15 +282,7 @@ void Threads::Updater::m_actionThreadFunc()
                     bool editedHotkey = false;
 
                     if (input->requiresRealTarget)
-                    {
-                        bool target = Objects::Client::Target(Game::getDataPointer(), input->position, input->targetId);
-                        if (!target)
-                        {
-                            it = std::remove(Globals::getInputs().begin(), Globals::getInputs().end(), input);
-                            Globals::getInputs().erase(it, Globals::getInputs().end());
-                            continue;
-                        }
-                    }
+                        Objects::Client::Target(Game::getDataPointer(), input->position);
                     else if (input->targetId)
                         Objects::Battlelist::setTargetId(Game::getDataPointer(), input->targetId);
 
