@@ -127,14 +127,18 @@ void Threads::PartyHunt::m_threadFunc()
                 else
                     timeToTargetAgain = timeNow + std::chrono::milliseconds(2000);
 
+                bool target = Objects::Client::Target(Game::getDataPointer(), creatureToTarget.Position, creatureToTarget.Id);
+
+                /*
                 Input* targetInput = new Input();
                 targetInput->requiresRealTarget = true;
+                targetInput->targetId = creatureToTarget.Id;
                 targetInput->canRepeat = true;
                 targetInput->gameTime = Game::getGameTime();
                 targetInput->position = creatureToTarget.Position;
-
+*/
                 minDelayBetweenTargets = timeNow + std::chrono::milliseconds(200);
-                Globals::addInput(targetInput);
+                //Globals::addInput(targetInput);
             }
         }
 

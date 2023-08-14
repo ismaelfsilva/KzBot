@@ -28,7 +28,7 @@ public:
     int itemId;
     uint64_t gameTime = 0;
     ItemUseType itemUseType;
-    uint32_t targetId;
+    uint32_t targetId = 0;
     bool requiresRealTarget = false;
     bool usesCrosshair = false;
     bool canRepeat = false;

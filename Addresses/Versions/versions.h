@@ -13,6 +13,7 @@ public:
     static bool isSupportedVersion(std::string versionString);
     static void setVersion(std::string versionString);
 private:
+    static void setV132013709(uint32_t baseAddress);
     static void setV131012892(uint32_t baseAddress);
     static void setV131213018(uint32_t baseAddress);
     static void setV131713405(uint32_t baseAddress);

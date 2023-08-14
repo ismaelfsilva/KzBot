@@ -282,7 +282,15 @@ void Threads::Updater::m_actionThreadFunc()
                     bool editedHotkey = false;
 
                     if (input->requiresRealTarget)
-                        Objects::Client::Target(Game::getDataPointer(), input->position);
+                    {
+                        bool target = Objects::Client::Target(Game::getDataPointer(), input->position, input->targetId);
+                        if (!target)
+                        {
+                            it = std::remove(Globals::getInputs().begin(), Globals::getInputs().end(), input);
+                            Globals::getInputs().erase(it, Globals::getInputs().end());
+                            continue;
+                        }
+                    }
                     else if (input->targetId)
                         Objects::Battlelist::setTargetId(Game::getDataPointer(), input->targetId);
 
@@ -300,12 +308,12 @@ void Threads::Updater::m_actionThreadFunc()
                         sentInput = true;
                         editedHotkey = true;
 
-                        for (int i = 0; i < 10; i++)
+                        for (int i = 0; i < 50; i++)
                         {
                             if (botKey->getText() == outputText)
                                 continue;
 
-                            Sleep(5);
+                            Sleep(1);
                         }
                     }
                     else if (input->itemId > 0)
@@ -321,24 +329,24 @@ void Threads::Updater::m_actionThreadFunc()
                         sentInput = true;
                         editedHotkey = true;
 
-                        for (int i = 0; i < 10; i++)
+                        for (int i = 0; i < 50; i++)
                         {
                             if (botKey->getId() == input->itemId)
                                 continue;
 
-                            Sleep(5);
+                            Sleep(1);
                         }
                     }
 
                     if (editedHotkey)
                     {
                         Util::KzHelper::SendKey(VK_F13);
-                        Sleep(10);
+                        Sleep(1);
 
                         if (input->usesCrosshair)
                         {
                             Util::KzHelper::LeftClick(Client::getSqmPoint(Game::getDataPointer(), input->position));
-                            Sleep(10);
+                            Sleep(1);
                         }
                     }
 
