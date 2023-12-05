@@ -71,6 +71,18 @@ private slots:
 
     void on_magicPotionShield_textChanged(const QString &arg1);
 
+    void on_avatarHp_textChanged(const QString &arg1);
+
+    void on_avatarMp_textChanged(const QString &arg1);
+
+    void on_foodAInput_currentTextChanged(const QString &arg1);
+
+    void on_foodBInput_currentTextChanged(const QString &arg1);
+
+    void on_foodAValue_textChanged(const QString &arg1);
+
+    void on_foodBValue_textChanged(const QString &arg1);
+
 private:
     Ui::Healer *ui;
     ScriptConfig *scriptConfig;

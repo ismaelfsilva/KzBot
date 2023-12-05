@@ -2,6 +2,8 @@
 #include "../Util/kzhelper.h"
 #include "../Settings/globals.h"
 #include "../Addresses/client.h"
+#include "../Addresses/inventory.h"
+#include "../Addresses/inventoryitem.h"
 #include "../Settings/actionsettings.h"
 #include "game.h"
 #include "hotkey.h"
@@ -531,51 +533,6 @@ actionSettings* Client::getHotkeyByItemId(int itemId, std::string useType)
     return NULL;
 }
 
-ChatStatus Client::getChatStatus(uint32_t dataPointer)
-{
-    std::vector<uint32_t> m_uiChatStatusAddr = Addresses::Client::getUiChatStatus();
-    uint32_t addr = dataPointer;
-
-    for (uint32_t offset : m_uiChatStatusAddr)
-    {
-        addr = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), addr + offset);
-    }
-
-    return (ChatStatus)addr;
-}
-
-std::string Client::getCurrentUiText()
-{
-    std::vector<uint32_t> m_uiCurrentTextAddr = Addresses::Client::getUiCurrentText();
-    uint32_t addr = 0x0;
-
-    for (uint32_t offset : m_uiCurrentTextAddr)
-    {
-        addr = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), addr + offset);
-        if (addr <= 0x10)
-            return "";
-    }
-
-    return Util::KzHelper::ReadMemoryStringUnicode(Globals::getHandle(), addr + 0x10);
-}
-
-void Client::setCurrentUiText(std::string text)
-{
-    std::vector<uint32_t> m_uiCurrentTextAddr = Addresses::Client::getUiCurrentText();
-    uint32_t addr = 0x0;
-
-    for (uint32_t offset : m_uiCurrentTextAddr)
-    {
-        addr = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), addr + offset);
-
-        if (addr <= 0x10)
-            return;
-    }
-
-    //Util::KzHelper::WriteMemoryInt32(Globals::getHandle(), addr + 0x4, text.length());
-    Util::KzHelper::WriteMemoryStringUnicode(Globals::getHandle(), addr + 0x10, text);
-}
-
 bool Client::getClientFocus()
 {
     std::vector<uint32_t> m_clientFocusAddr = Addresses::Client::getClientFocus();
@@ -604,22 +561,18 @@ std::map<InventorySlot, InventoryItem *> Client::getInventoryItems()
 {
     std::map<InventorySlot, InventoryItem *> inventoryItems;
 
-    uint32_t inventoryPointer = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), Addresses::Client::getInventoryPointer());
+    uint32_t dataPointer = Client::getDataPointer();
+    uint32_t inventoryPointer = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), dataPointer + Addresses::Inventory::getPointer());
+    uint32_t inventoryContainerPointer = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), inventoryPointer + Addresses::Inventory::getInventoryContainerPointer());
 
-    auto inventoryDataList = Util::KzHelper::readQtCollection(inventoryPointer);
-    for (auto itemData : inventoryDataList)
+    auto inventoryDataList = Util::KzHelper::readQtCollection(inventoryContainerPointer + Addresses::Inventory::getInventoryContainerItemList());
+    for (auto inventoryItemData : inventoryDataList)
     {
-        uint32_t itemPointer = itemData.first;
+        uint32_t itemSlot = inventoryItemData.first;
+        uint32_t itemPointer = inventoryItemData.second;
 
-        for (uint32_t offset : Addresses::Client::getInventoryPathToItem())
-            itemPointer = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), itemPointer + offset);
-
-        InventoryItem* item = new InventoryItem(itemPointer);
-
-        if (item->isEquipped())
-            inventoryItems[item->getSlot()] = item;
-        else
-            delete item;
+        InventoryItem* item = new InventoryItem(itemSlot, itemPointer);
+        inventoryItems[item->getSlot()] = item;
     }
 
     return inventoryItems;
@@ -752,19 +705,16 @@ std::vector<KeyBinding*> Client::getKeyBindings()
 {
     std::vector<KeyBinding*> keyBindings;
 
-    /*
     uint32_t dataPointer = getDataPointer();
-    uint32_t hotkeyCollection = dataPointer;
-    for (uint32_t offset : Addresses::Client::getKeyBindingCollection())
-        hotkeyCollection = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), hotkeyCollection + offset);
-    std::vector<uint32_t> hotkeyPresetQtCollection = Util::KzHelper::readQtCollection(hotkeyCollection);
 
-    for (uint32_t hotkeyAddr : hotkeyPresetQtCollection)
+    uint32_t keyBindingCollectionClass = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), dataPointer + Addresses::Client::getKeyBindingCollection()[0]);
+    std::map<uint32_t, uint32_t> keyBindingsQtCollection = Util::KzHelper::readQtCollection(keyBindingCollectionClass + Addresses::Client::getKeyBindingCollection()[1]);
+
+    for (auto hotkey : keyBindingsQtCollection)
     {
-        Objects::KeyBinding* keyBinding = new Objects::KeyBinding(hotkeyAddr);
+        Objects::KeyBinding* keyBinding = new Objects::KeyBinding(hotkey.first, hotkey.second);
         keyBindings.push_back(keyBinding);
     }
-    */
 
     return keyBindings;
 }

@@ -13,7 +13,7 @@ Cooldown::Cooldown(uint32_t id, uint32_t addr)
     m_address = addr;
 }
 
-uint8_t Cooldown::id()
+uint16_t Cooldown::id()
 {
     return m_id;
 }

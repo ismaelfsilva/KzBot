@@ -7,6 +7,8 @@
 #include "../Threads/partyhunt.h"
 #include "configchooser.h"
 #include "healer.h"
+#include "hudpvp.h"
+#include "hudstatuses.h"
 #include "partyhunt.h"
 #include "pvptools.h"
 #include "toolstab.h"
@@ -23,9 +25,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    Ui::MainWindow *ui;
 
     Healer *healer;
     ConfigChooser *configChooser;
+    HUDStatuses *hudStatuses;
+    HUDPvP *hudPvP;
     ToolsTab *tools;
     PvpTools *pvpTools;
     PartyHunt *partyHunt;
@@ -45,8 +50,6 @@ private slots:
     void on_actionDefault_triggered();
 
     void on_actionDefault_2_triggered();
-
-    void on_actionShow_Config_Selector_toggled(bool arg1);
 
     void on_actionTank_2_triggered();
 
@@ -74,8 +77,17 @@ private slots:
 
     void on_actionInitial_Config_triggered();
 
+    void on_actionLogout_triggered();
+
+    void on_actionStatus_triggered();
+
+    void on_actionPvP_triggered();
+
+    void on_actionConfig_Selector_triggered();
+
+    void on_actionv0_1_10_0_triggered();
+
 private:
-    Ui::MainWindow *ui;
 
     Threads::Updater *updaterThread;
 

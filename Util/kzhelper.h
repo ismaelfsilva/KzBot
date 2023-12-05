@@ -32,7 +32,7 @@ extern float ReadMemoryFloat(HANDLE &handle, uint32_t address);
 extern double ReadMemoryDouble(HANDLE &handle, uint32_t address);
 extern std::string ReadMemoryString(HANDLE &handle, uint32_t address);
 extern std::string ReadMemoryStringUnicode(HANDLE &handle, uint32_t address);
-extern uint32_t GetProcessBaseAddress( DWORD processID );
+extern uint32_t GetProcessBaseAddress( DWORD processID, HANDLE& processHandle );
 
 
 extern BOOL CALLBACK EnumWindowsCallback(HWND hWnd, LPARAM lParam);
@@ -55,7 +55,8 @@ extern void RightClick(Point* p);
 extern void SendText(std::string text, bool lockKeyboard = false);
 
 extern std::map<uint32_t, uint32_t> readQtCollection(uint32_t address);
-extern int readQtCollectionNode(uint32_t& addrCurrentItem, uint32_t& addrPrevItem, std::map<uint32_t, uint32_t>& addrCollection, uint32_t& currentDepth, uint32_t& maxDepth, uint32_t& adrRoot);
+extern std::map<uint32_t, uint32_t> readQtCollection(HANDLE& handle, uint32_t address);
+extern int readQtCollectionNode(HANDLE& handle, uint32_t& addrCurrentItem, uint32_t& addrPrevItem, std::map<uint32_t, uint32_t>& addrCollection, uint32_t& currentDepth, uint32_t& maxDepth, uint32_t& adrRoot);
 
 extern uint32_t getlParam(uint key, bool up = false, bool extended = false);
 extern bool stringVKisExtended(std::string str);

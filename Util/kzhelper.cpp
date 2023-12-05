@@ -129,10 +129,9 @@ void Util::KzHelper::WriteMemoryStringUnicode(HANDLE &handle, uint32_t address, 
     WriteProcessMemory(handle, reinterpret_cast<LPVOID>(address), unicodeString.c_str(), unicodeString.size() * sizeof(wchar_t), &bytesWritten);
 }
 
-uint32_t Util::KzHelper::GetProcessBaseAddress( DWORD processID )
+uint32_t Util::KzHelper::GetProcessBaseAddress( DWORD processID, HANDLE& processHandle)
 {
     DWORD_PTR   baseAddress = 0;
-    HANDLE      &processHandle = Globals::getHandle();
     HMODULE     *moduleArray;
     LPBYTE      moduleArrayBytes;
     DWORD       bytesRequired;
@@ -262,8 +261,6 @@ void Util::KzHelper::LeftClick(int x, int y)
 
 void Util::KzHelper::LeftClick(Point* p)
 {
-    if (p == nullptr)
-        return;
     uint32_t lParam = MAKELPARAM(p->x, p->y);
     SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParam);
     SendMessage(Globals::getHWnd(), WM_LBUTTONDOWN, MK_LBUTTON, lParam);
@@ -282,8 +279,6 @@ void Util::KzHelper::RightClick(int x, int y)
 
 void Util::KzHelper::RightClick(Point* p)
 {
-    if (p == nullptr)
-        return;
     uint32_t lParam = MAKELPARAM(p->x, p->y);
     SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParam);
     SendMessage(Globals::getHWnd(), WM_RBUTTONDOWN, MK_RBUTTON, lParam);
@@ -650,18 +645,18 @@ Qt::Key Util::KzHelper::vkToQtKey(uint32_t vk)
 
 
 
-
-
-
-
-
 std::map<uint32_t, uint32_t> Util::KzHelper::readQtCollection(uint32_t address)
+{
+    return readQtCollection(Globals::getHandle(), address);
+}
+
+std::map<uint32_t, uint32_t> Util::KzHelper::readQtCollection(HANDLE& handle, uint32_t address)
 {
     std::map<uint32_t, uint32_t> qtCollectionAddresses;
 
     // Reads Collection Root Node Pointer and Item Count
     char qtCollectionData[0x8];
-    if (!ReadMemory(Globals::getHandle(), address, qtCollectionData, sizeof(qtCollectionData)))
+    if (!ReadMemory(handle, address, qtCollectionData, sizeof(qtCollectionData)))
         return qtCollectionAddresses;
 
     // If Collection is empty returns
@@ -678,7 +673,7 @@ std::map<uint32_t, uint32_t> Util::KzHelper::readQtCollection(uint32_t address)
 
     // Reads Root Node's 3 Pointers (0x0, 0x4, 0x8)
     char rootNodeData[0xC];
-    if (!ReadMemory(Globals::getHandle(), addrStarterItem, rootNodeData, sizeof(rootNodeData)))
+    if (!ReadMemory(handle, addrStarterItem, rootNodeData, sizeof(rootNodeData)))
         return qtCollectionAddresses;
 
     int totalIterationCount = 0;
@@ -693,20 +688,20 @@ std::map<uint32_t, uint32_t> Util::KzHelper::readQtCollection(uint32_t address)
     std::cout << std::hex << "Node C: " << nodeC << std::endl;
     */
 
-    totalIterationCount += readQtCollectionNode(*reinterpret_cast<uint32_t*>(rootNodeData + 0x0), addrStarterItem, qtCollectionAddresses, currentItemCount, totalItems, addrStarterItem);
-    totalIterationCount += readQtCollectionNode(*reinterpret_cast<uint32_t*>(rootNodeData + 0x4), addrStarterItem, qtCollectionAddresses, currentItemCount, totalItems, addrStarterItem);
-    totalIterationCount += readQtCollectionNode(*reinterpret_cast<uint32_t*>(rootNodeData + 0x8), addrStarterItem, qtCollectionAddresses, currentItemCount, totalItems, addrStarterItem);
+    totalIterationCount += readQtCollectionNode(handle, *reinterpret_cast<uint32_t*>(rootNodeData + 0x0), addrStarterItem, qtCollectionAddresses, currentItemCount, totalItems, addrStarterItem);
+    totalIterationCount += readQtCollectionNode(handle, *reinterpret_cast<uint32_t*>(rootNodeData + 0x4), addrStarterItem, qtCollectionAddresses, currentItemCount, totalItems, addrStarterItem);
+    totalIterationCount += readQtCollectionNode(handle, *reinterpret_cast<uint32_t*>(rootNodeData + 0x8), addrStarterItem, qtCollectionAddresses, currentItemCount, totalItems, addrStarterItem);
 
     //std::cout << "Total Iterations: " << totalIterationCount << std::endl;
 
     return qtCollectionAddresses;
 }
 
-int Util::KzHelper::readQtCollectionNode(uint32_t& addrCurrentItem, uint32_t& addrPrevItem, std::map<uint32_t, uint32_t>& addrCollection, uint32_t& currentDepth, uint32_t& maxDepth, uint32_t& adrRoot)
+int Util::KzHelper::readQtCollectionNode(HANDLE& handle, uint32_t& addrCurrentItem, uint32_t& addrPrevItem, std::map<uint32_t, uint32_t>& addrCollection, uint32_t& currentDepth, uint32_t& maxDepth, uint32_t& adrRoot)
 {
     // Reads 3 Pointers (0x0, 0x4, 0x8) and Node's Id (0x10)
     char collectionNodeData[0x14];
-    if (!ReadMemory(Globals::getHandle(), addrCurrentItem, collectionNodeData, sizeof(collectionNodeData)))
+    if (!ReadMemory(handle, addrCurrentItem, collectionNodeData, sizeof(collectionNodeData)))
         return 1;
 
     uint32_t currentItemId = *reinterpret_cast<uint32_t*>(collectionNodeData + 0x10);
@@ -729,13 +724,13 @@ int Util::KzHelper::readQtCollectionNode(uint32_t& addrCurrentItem, uint32_t& ad
     uint32_t childC = *reinterpret_cast<uint32_t*>(collectionNodeData + 0x8);
 
     if (childA != addrPrevItem && childA != adrRoot)
-        totalIterationCount += readQtCollectionNode(childA, addrCurrentItem, addrCollection, currentDepth, maxDepth, adrRoot);
+        totalIterationCount += readQtCollectionNode(handle, childA, addrCurrentItem, addrCollection, currentDepth, maxDepth, adrRoot);
 
     if (childB != addrPrevItem && childB != adrRoot)
-        totalIterationCount += readQtCollectionNode(childB, addrCurrentItem, addrCollection, currentDepth, maxDepth, adrRoot);
+        totalIterationCount += readQtCollectionNode(handle, childB, addrCurrentItem, addrCollection, currentDepth, maxDepth, adrRoot);
 
     if (childC != addrPrevItem && childC != adrRoot)
-        totalIterationCount += readQtCollectionNode(childC, addrCurrentItem, addrCollection, currentDepth, maxDepth, adrRoot);
+        totalIterationCount += readQtCollectionNode(handle, childC, addrCurrentItem, addrCollection, currentDepth, maxDepth, adrRoot);
 
     return totalIterationCount;
 }

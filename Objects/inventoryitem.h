@@ -11,13 +11,15 @@ namespace Objects
 class InventoryItem
 {
 public:
-    InventoryItem(uint32_t addr);
+    InventoryItem(uint32_t slotId, uint32_t addr);
 
     uint32_t getId();
     uint32_t getCount();
     bool isEquipped();
     InventorySlot getSlot();
+    uint32_t getItemData();
 private:
+    uint32_t m_slotId;
     uint32_t m_address;
 };
 }

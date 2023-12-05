@@ -28,6 +28,8 @@ void Threads::Healer::Start()
         m_healerThread = std::thread(&Threads::Healer::m_threadFunc, this);
 }
 
+    // 266 AVATAR MS
+
 void Threads::Healer::m_threadFunc()
 {
         //try
@@ -60,7 +62,7 @@ void Threads::Healer::m_threadFunc()
                 if (!rule->enabled || ruleSpell == nullptr)
                     continue;
 
-                if (ruleSpell != nullptr && (cooldownGroupUsed[ruleSpell->group] || Game::isSpellOnCooldown(ruleSpell) || ruleSpell->mana > playerMana || ruleSpell->level > playerLevel || !ruleSpell->vocations[playerVoc]))
+                if (ruleSpell != nullptr && (cooldownGroupUsed[ruleSpell->group] || Game::isSpellOnCooldown(ruleSpell) || (ruleSpell->duration > 0 && Game::getGameTime() < Game::getSpellLastCooldownEnd(ruleSpell) + ruleSpell->duration) || ruleSpell->mana > playerMana || ruleSpell->level > playerLevel || !ruleSpell->vocations[playerVoc]))
                     continue;
 
                 bool isItem = ruleSpell->itemId > 0;
@@ -70,17 +72,21 @@ void Threads::Healer::m_threadFunc()
                 if (isItem && ruleSpell->itemId == 35563 && usedUtamo)
                     continue;
 
-                if (ruleSpell->id == 245 && (usedUtamo || playerMagicShield < rule->minMagicShield || (rule->minHp > 0 && playerHp < rule->minHp) || (rule->maxMp > 0 && playerMp > rule->maxMp)))
+                if (ruleSpell->id == 245 && (usedUtamo || playerMagicShield < rule->minMagicShield || ((rule->minHp == 0 || playerHp < rule->minHp) && (rule->maxMp == 0 || playerMp > rule->maxMp))))
                     continue;
                 else if (ruleSpell->id != 245 && (playerHp < rule->minHp || playerHp > rule->maxHp || playerMp < rule->minMp || playerMp > rule->maxMp || playerMagicShield < rule->minMagicShield || playerMagicShield > rule->maxMagicShield ))
                     continue;
+
+                // Sio ter prioridade do que cura se tiver de utamo
+                //if ((Globals::getScriptConfig()->getHealFriendGeneralStatus() && !(ruleSpell->requiresPlayerNameParam && ruleSpell->requiresTarget) && friendToHeal.Id > 0 && !isItem) && playerMagicShield > 50 && playerHp > 60)
+                //    continue;
+
 
                 if ((ruleSpell->requiresPlayerNameParam || ruleSpell->requiresTarget) && (friendToHeal.Id == 0 || friendToHeal.Health < rule->minCreatureHp || friendToHeal.Health > rule->maxCreatureHp))
                     continue;
 
                 if (!Game::canCast(rule->delayType1) || !Game::canCast(rule->delayType2))
                     continue;
-
 
                 if (isItem)
                 {

@@ -10,6 +10,7 @@ class ComboRule
 {
 public:
     ComboRule();
+    ComboRule(std::string);
 
     std::string leader;
     std::string content;

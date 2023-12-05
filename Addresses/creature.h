@@ -28,6 +28,7 @@ public:
     static uint32_t getType() { return m_type; };
     static uint32_t getGuild() { return m_guild; };
     static uint32_t getParty() { return m_party; };
+    static uint32_t getOutOfPz() { return m_outPz; };
     static uint32_t getSkull() { return m_skull; };
     static uint32_t getIsNear() { return m_isNear; };
     static uint32_t getVocation() { return m_vocation; };
@@ -53,6 +54,7 @@ public:
     static void setType(uint32_t type) { m_type = type; };
     static void setGuild(uint32_t guild) { m_guild = guild; };
     static void setParty(uint32_t party) { m_party = party; };
+    static void setOutOfPz(uint32_t outOfPz) { m_outPz = outOfPz; };
     static void setSkull(uint32_t skull) { m_skull = skull; };
     static void setIsNear(uint32_t isNear) { m_isNear = isNear; };
     static void setVocation(uint32_t vocation) { m_vocation = vocation; };
@@ -84,6 +86,7 @@ private:
     static uint32_t m_guild;
     static uint32_t m_skull;
     static uint32_t m_party;
+    static uint32_t m_outPz;
     static uint32_t m_isNear;
     static uint32_t m_vocation;
     static uint32_t m_mouseHovered;

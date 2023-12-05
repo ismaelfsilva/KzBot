@@ -9,6 +9,11 @@ ActionRule::ActionRule()
 
 }
 
+ActionRule::ActionRule(std::string _name)
+{
+    name = _name;
+}
+
 bool ActionRule::Deserialize(QXmlStreamReader &reader)
 {
     isDefaultValue = false;

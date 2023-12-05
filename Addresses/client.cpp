@@ -3,6 +3,7 @@
 using namespace Addresses;
 
 uint32_t Client::m_baseAddress;
+uint32_t Client::m_loggedIn;
 uint32_t Client::m_dataPointer;
 
 uint32_t Client::m_cooldownsPointer;

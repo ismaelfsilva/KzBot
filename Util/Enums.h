@@ -10,6 +10,11 @@ enum class DelayType
     DefaultRing,
     Heal,
     Item,
+    Food,
+    NpcFood,
+    CupcakeHp,
+    CupcakeMp,
+    Utamo
 };
 
 enum class ActionType
@@ -38,6 +43,7 @@ enum class CooldownGroup
     Heal = 2,
     Support = 3,
     Equip = 4,
+    Food = 4,
 };
 
 enum class AmuletType
@@ -164,6 +170,37 @@ enum class InventorySlot
     InventorySlotExt3,
     InventorySlotExt4,
     LastInventorySlot
+};
+
+enum class Icons
+{
+    ICON_POISON = 0,
+    ICON_BURN = 1,
+    ICON_ENERGY = 2,
+    ICON_DRUNK = 3,
+    ICON_MANASHIELD = 4,
+    ICON_PARALYZE = 5,
+    ICON_HASTE = 6,
+    ICON_SWORDS = 7,
+    ICON_DROWNING = 8,
+    ICON_FREEZING = 9,
+    ICON_DAZZLED = 10,
+    ICON_CURSED = 11,
+    ICON_PARTY_BUFF = 12,
+    ICON_REDSWORDS = 13,
+    ICON_PIGEON = 14,
+    ICON_BLEEDING = 15,
+    ICON_LESSERHEX = 16,
+    ICON_INTENSEHEX = 17,
+    ICON_GREATERHEX = 18,
+    ICON_ROOT = 19,
+    ICON_FEAR = 20,
+    ICON_GOSHNAR1 = 21,
+    ICON_GOSHNAR2 = 22,
+    ICON_GOSHNAR3 = 23,
+    ICON_GOSHNAR4 = 24,
+    ICON_GOSHNAR5 = 25,
+    ICON_MANASHIELD_BREAKABLE = 26,
 };
 
 #endif // ENUMS_H

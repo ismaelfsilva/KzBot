@@ -45,6 +45,66 @@ void Threads::Tools::m_threadFunc()
             {CooldownGroup::Support, Game::isGroupOnCooldown(CooldownGroup::Support)}
         };
 
+        // Anti Idle
+        static uint64_t lastActionTime = Game::getPlayerLastWalk();
+        if (scriptConfig->getToolsAntiIdle())
+        {
+            if (Game::getPlayerLastWalk() > lastActionTime)
+                lastActionTime = Game::getPlayerLastWalk();
+
+            if (Game::getGameTime() - lastActionTime >= 9 * 60 * 1000)
+            {
+                Client::Turn(Direction::NORTH);
+                Client::Turn(Direction::SOUTH);
+
+                lastActionTime = Game::getGameTime();
+            }
+        }
+
+        // Auto Eat Food
+        //static uint64_t lastEatFoodTime = 0;
+        if (scriptConfig->getToolsEatFood())
+        {
+            //if (Game::getGameTime() - lastEatFoodTime > 120 * 1000)
+            if (Game::getPlayerIsHungry())
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    Input* itemInput = new Input();
+                    itemInput->gameTime = Game::getGameTime();
+                    itemInput->itemId = scriptConfig->getToolsEatFoodId();
+                    itemInput->itemUseType = ItemUseType::Use;
+
+                    Globals::addInput(itemInput);
+                }
+
+                //lastEatFoodTime = Game::getGameTime();
+            }
+        }
+
+        // Auto Buff
+        static uint64_t lastBuffTime = 0;
+        if (scriptConfig->getToolsAutoBuff())
+        {
+            if (!Game::getPlayerHasStatus(Icons::ICON_PARTY_BUFF) && Game::getGameTime() - lastBuffTime > 2000)
+            {
+                Input* itemInput = new Input();
+                itemInput->gameTime = Game::getGameTime();
+                itemInput->itemId = scriptConfig->getToolsAutoBuffItemId();
+                itemInput->itemUseType = ItemUseType::Use;
+
+                Globals::addInput(itemInput);
+
+                lastBuffTime = Game::getGameTime();
+            }
+        }
+
+        // Auto Hold Position
+        if (scriptConfig->getToolsHoldPosition() &&  Game::getPlayerPosition() != scriptConfig->getToolsHoldPositionPos())
+        {
+            Client::Goto(scriptConfig->getToolsHoldPositionPos());
+        }
+
         for (ActionRule* rule : scriptConfig->ToolsRules)
         {
             Spell* ruleSpell = rule->spell;
@@ -79,12 +139,11 @@ void Threads::Tools::m_threadFunc()
             else if (playerHp < rule->minHp || playerHp > rule->maxHp || playerMp < rule->minMp || playerMp > rule->maxMp || playerMagicShield < rule->minMagicShield || playerMagicShield > rule->maxMagicShield )
                 continue;
 
-            if (rule->hasteSpell && playerSpeed >= floor((playerLevel + 100) * 1.3))
+            if (rule->hasteSpell && Game::getPlayerHasStatus(Icons::ICON_HASTE))
                 continue;
 
-            if (rule->onParalyzeSpell && playerSpeed >= playerLevel + 100)
+            if (rule->onParalyzeSpell && !Game::getPlayerHasStatus(Icons::ICON_PARALYZE))
                 continue;
-
 
             if (rule->type == ActionType::Equip)
             {
@@ -114,6 +173,8 @@ void Threads::Tools::m_threadFunc()
                 textInput->text = ruleSpell->words;
 
                 Globals::addInput(textInput);
+
+                // CHECK IF HAS DURATION, THEN SET SPELL COOLDOWN TO DURATION
                 cooldownGroupUsed[ruleSpell->group] = true;
             }
 

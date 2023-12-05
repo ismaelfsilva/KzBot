@@ -89,6 +89,9 @@ void Threads::PartyHunt::m_threadFunc()
         if (Game::getCreaturesAroundCount() <= 0) // No Creatures Around
             return;
 
+        if (Game::getPlayerHasStatus(Icons::ICON_PIGEON))
+            return;
+
         bool usedItem = false;
         std::unordered_map<CooldownGroup, bool> cooldownGroupUsed = {
             {CooldownGroup::Heal, Game::isGroupOnCooldown(CooldownGroup::Heal)},
@@ -143,7 +146,6 @@ void Threads::PartyHunt::m_threadFunc()
         if (cooldownGroupUsed[CooldownGroup::Attack])
             return;
 
-
         int playerHp = Game::getPlayerHpPercent();
         int playerMp = Game::getPlayerMpPercent();
         int playerMana = Game::getPlayerMp();
@@ -171,6 +173,7 @@ void Threads::PartyHunt::m_threadFunc()
         std::vector<ActionRule*>* targetingRules = &scriptConfig->TargetRules;
         if (scriptConfig->getPartyHuntUseEKCombo())
             targetingRules = &scriptConfig->KnightTargetRules;
+
 
         for (ActionRule* rule : *targetingRules)
         {
@@ -219,8 +222,22 @@ void Threads::PartyHunt::m_threadFunc()
             }
             else if (ruleSpell->requiresTarget)
             {
-                if ((lowestCreature.Id <= 0 || lowestCreature.Health > rule->maxCreatureHp))
+                if ((lowestCreature.Id <= 0 || lowestCreature.Health > rule->maxCreatureHp || lowestCreature.Health <= 0))
                     continue;
+                else if (ruleSpell->range > 0 && lowestCreature.distToPlayer > ruleSpell->range)
+                {
+                    for (CachedCreature creature : Game::getCreaturesOnScreen())
+                    {
+                        if (creature.distToPlayer <= ruleSpell->range && creature.Health <= rule->maxCreatureHp && creature.Health > 0)
+                        {
+                            lowestCreature = creature;
+                            break;
+                        }
+                    }
+
+                    if (ruleSpell->range > 0 && lowestCreature.distToPlayer > ruleSpell->range)
+                        continue;
+                }
             }
             else if (ruleSpell->selfTarget)
             {
@@ -297,6 +314,8 @@ void Threads::PartyHunt::m_threadFunc()
                         textInput->position = partyKnight.Position;
                     else if (!rule->centerKnight && lowestCreature.Id > 0)
                         textInput->position = lowestCreature.Position;
+                    else if (rule->centerKnight && ruleSpell->area > 0)
+                    {}
                     else
                     {
                         delete textInput;

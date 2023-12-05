@@ -7,6 +7,7 @@
 #include <QXmlStreamWriter>
 #include <string>
 #include <vector>
+#include "../Objects/position.h"
 
 class ScriptConfig
 {
@@ -46,6 +47,11 @@ public:
         {DelayType::DefaultRing, 500},
         {DelayType::Heal, 0},
         {DelayType::Item, 500},
+        {DelayType::Food, 500},
+        {DelayType::NpcFood, 600000},
+        {DelayType::CupcakeHp, 600000},
+        {DelayType::CupcakeMp, 600000},
+        {DelayType::Utamo, 500},
     };
 
 
@@ -66,9 +72,31 @@ public:
 
     std::vector<ComboRule*> ComboRules;
 
+    uint32_t getUECountToConsiderCombo() { return m_UEsToConsiderCombo; };
+    void setPvPOnComboUE(bool value) { m_pvpOnComboUE = value; };
+    bool getPvPOnComboUE() { return m_pvpOnComboUE; };
+    ComboRule* m_pvpOnComboUEActionA = nullptr;
+    ComboRule* m_pvpOnComboUEActionB = nullptr;
+
+    uint32_t getAvatarCountToConsiderCombo() { return m_AvatarCountToConsiderCombo; };
+    void setPvPOnComboAvatar(bool value) { m_pvpOnComboAvatar = value; };
+    bool getPvPOnComboAvatar() { return m_pvpOnComboAvatar; };
+    ComboRule* m_pvpOnComboAvatarActionA = nullptr;
+    ComboRule* m_pvpOnComboAvatarActionB = nullptr;
+
+
 
     void setPartyHuntStatus(bool value) { m_partyHuntStatus = value; };
     bool getPartyHuntStatus() { return m_partyHuntStatus; };
+
+    void setPartyHuntUseTargetNext(bool value) { m_partyHuntUseTargetNext = value; };
+    bool getPartyHuntUseTargetNext() { return m_partyHuntUseTargetNext; };
+    void setPartyHuntTargetNextKey(uint32_t value) { m_partyHuntTargetNextKey = value; };
+    uint32_t getPartyHuntTargetNextKey() { return m_partyHuntTargetNextKey; };
+    void setPartyHuntTargetNextKeyExtended(bool value) { m_partyHuntTargetNextKeyExtended = value; };
+    bool getPartyHuntTargetNextKeyExtended() { return m_partyHuntTargetNextKeyExtended; };
+
+
     void setPartyHuntAreaRune(bool value) { m_partyHuntAreaRune = value; };
     bool getPartyHuntAreaRune() { return m_partyHuntAreaRune; };
     void setPartyHuntUseFakeTarget(bool value) { m_partyHuntUseFakeTarget = value; };
@@ -108,6 +136,24 @@ public:
 
     void setToolsReadInventory(bool value) { m_toolsReadInventory = value; };
     bool getToolsReadInventory() { return m_toolsReadInventory; };
+
+    bool getToolsAntiIdle() const { return m_toolsAntiIdle; }
+    bool getToolsEatFood() const { return m_toolsEatFood; }
+    int getToolsEatFoodId() const { return m_toolsEatFoodId; }
+    bool getToolsHoldPosition() const { return m_toolsHoldPosition; }
+    Position getToolsHoldPositionPos() { return m_toolsHoldPositionPos; }
+    bool getToolsChangeGold() const { return m_toolsChangeGold; }
+    bool getToolsAutoBuff() const { return m_toolsAutoBuff; }
+    int getToolsAutoBuffItemId() const { return m_toolsBuffItemId; }
+
+    void setToolsAntiIdle(bool value) { m_toolsAntiIdle = value; }
+    void setToolsEatFood(bool value) { m_toolsEatFood = value; }
+    void setToolsEatFoodId(int value) { m_toolsEatFoodId = value; }
+    void setToolsHoldPosition(bool value) { m_toolsHoldPosition = value; }
+    void setToolsHoldPositionPos(Position value) { m_toolsHoldPositionPos = value; }
+    void setToolsChangeGold(bool value) { m_toolsChangeGold = value; }
+    void setToolsAutoBuff(bool value) { m_toolsAutoBuff = value; }
+    void setToolsAutoBuffItemId(int value) { m_toolsBuffItemId = value; }
 
 
 
@@ -155,17 +201,37 @@ private:
 
     bool m_toolsStatus = false;
     bool m_toolsReadInventory = false;
+    bool m_toolsReadItems = false;
+
+    bool m_toolsAntiIdle = false;
+    bool m_toolsEatFood = false;
+    int m_toolsEatFoodId = 0;
+    bool m_toolsHoldPosition = false;
+    Position m_toolsHoldPositionPos = Position(0, 0, 0);
+    bool m_toolsChangeGold = false;
+    bool m_toolsAutoBuff = false;
+    int m_toolsBuffItemId = 0;
 
 
 
+
+    int m_UEsToConsiderCombo = 3;
+    int m_AvatarCountToConsiderCombo = 3;
 
     bool m_pvpToolsStatus = false;
     bool m_pvpHoldTarget = false;
     bool m_pvpParalyzeTarget = false;
     bool m_pvpDashTarget = false;
+
+    bool m_pvpOnComboUE = false;
+    bool m_pvpOnComboAvatar = false;
+
     bool m_pvpChatNaviStatus = true;
 
     bool m_partyHuntStatus = false;
+    bool m_partyHuntUseTargetNext = false;
+    uint32_t m_partyHuntTargetNextKey = 0x0;
+    bool m_partyHuntTargetNextKeyExtended = false;
     bool m_partyHuntUseFakeTarget = true;
     bool m_partyHuntAreaRune = false;
     bool m_partyHuntAutoTargetStatus = false;

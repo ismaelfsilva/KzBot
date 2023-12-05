@@ -1,9 +1,11 @@
 #include "healer.h"
+#include "mainwindow.h"
 #include "ui_healer.h"
 #include "../Settings/globals.h"
 #include "../Settings/actionrule.h"
 #include "../Settings/scriptconfig.h"
 #include "../Objects/client.h"
+#include "ui_hudstatuses.h"
 #include <QTableWidget>
 #include <iostream>
 
@@ -18,6 +20,16 @@ Healer::Healer(QWidget *parent) :
 
     scriptConfig->HealRules.clear();
 
+
+    ActionRule* foodA = scriptConfig->addHealRule("foodA", ActionType::Item, "blueberry cupcake");
+    foodA->delayType1 = DelayType::CupcakeMp;
+    foodA->delayType2 = DelayType::Food;
+    foodA->alwaysUse = true;
+    ActionRule* foodB = scriptConfig->addHealRule("foodB", ActionType::Item, "blessed steak");
+    foodB->delayType1 = DelayType::NpcFood;
+    foodB->delayType2 = DelayType::Food;
+    foodB->alwaysUse = true;
+
     ActionRule* spellLo = scriptConfig->addHealRule("spellLo", ActionType::Spell, nullptr);
     spellLo->maxHp = 0;
 
@@ -25,18 +37,25 @@ Healer::Healer(QWidget *parent) :
     magicShieldSpell->maxMagicShield = 0;
     magicShieldSpell->maxHp = 0;
     magicShieldSpell->minHp = 0;
+    magicShieldSpell->delayType1 = DelayType::Utamo;
 
     ActionRule* magicShieldPotion = scriptConfig->addHealRule("magicShieldPotion", ActionType::Item, "magic shield potion");
     magicShieldPotion->maxMagicShield = 0;
     magicShieldPotion->maxHp = 0;
     magicShieldPotion->minHp = 0;
     magicShieldPotion->alwaysUse = true;
+    magicShieldPotion->delayType1 = DelayType::Utamo;
 
     ActionRule* spellMed = scriptConfig->addHealRule("spellMed", ActionType::Spell, nullptr);
     spellMed->maxHp = 0;
 
     ActionRule* spellHi = scriptConfig->addHealRule("spellHi", ActionType::Spell, nullptr);
     spellHi->maxHp = 0;
+
+    ActionRule* avatar = scriptConfig->addHealRule("avatar", ActionType::Spell, nullptr);
+    avatar->isDefaultValue = false;
+    avatar->maxHp = 0;
+    avatar->maxMp = 0;
 
     ActionRule* hpPotionLo = scriptConfig->addHealRule("hpPotionLo", ActionType::Item, "supreme health potion");
     hpPotionLo->maxHp = 0;
@@ -143,6 +162,12 @@ void Healer::on_healFriendEkStatus_stateChanged(int arg1)
     scriptConfig->setHealFriendGeneralStatus(status);
     healFriend->enabled = status;
     uhRune->enabled = status;
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->healFriendStatus->setChecked(status);
 }
 
 
@@ -167,6 +192,12 @@ void Healer::on_healFriendRpStatus_stateChanged(int arg1)
     scriptConfig->setHealFriendGeneralStatus(status);
     healFriend->enabled = status;
     uhRune->enabled = status;
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->healFriendStatus->setChecked(status);
 }
 
 
@@ -191,6 +222,12 @@ void Healer::on_healFriendEdStatus_stateChanged(int arg1)
     scriptConfig->setHealFriendGeneralStatus(status);
     healFriend->enabled = status;
     uhRune->enabled = status;
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->healFriendStatus->setChecked(status);
 }
 
 
@@ -215,6 +252,12 @@ void Healer::on_healFriendMsStatus_stateChanged(int arg1)
     scriptConfig->setHealFriendGeneralStatus(status);
     healFriend->enabled = status;
     uhRune->enabled = status;
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->healFriendStatus->setChecked(status);
 }
 
 
@@ -315,6 +358,14 @@ void Healer::ResetUI()
     ui->hpPotionLoInput->setCurrentIndex(0);
     ui->mpPotionInput->setCurrentIndex(0);
 
+
+    ui->avatarHp->setText("");
+    ui->avatarMp->setText("");
+    ui->foodAInput->setCurrentIndex(1);
+    ui->foodAValue->setText("");
+    ui->foodBInput->setCurrentIndex(0);
+    ui->foodBValue->setText("");
+
     ui->hpPotionHiHp->setText("");
     ui->hpPotionLoHp->setText("");
     ui->mpPotionMp->setText("");
@@ -349,6 +400,10 @@ void Healer::UpdateUI()
     ActionRule *hpPotionHi = scriptConfig->getHealRule("hpPotionHi");
     ActionRule *hpPotionLo = scriptConfig->getHealRule("hpPotionLo");
     ActionRule *mpPotion = scriptConfig->getHealRule("mpPotion");
+
+    ActionRule *avatar = scriptConfig->getHealRule("avatar");
+    ActionRule *foodA = scriptConfig->getHealRule("foodA");
+    ActionRule *foodB = scriptConfig->getHealRule("foodB");
 
     ActionRule *healFriend = scriptConfig->getHealRule("healFriend");
     ActionRule *strongHealFriend = scriptConfig->getHealRule("strongHealFriend");
@@ -414,6 +469,22 @@ void Healer::UpdateUI()
     ui->healFriendGranSioStatus->setChecked(strongHealFriend->enabled);
     if (strongHealFriend->maxCreatureHp > 0)
         ui->healFriendGranSioHp->setText(QString::number(strongHealFriend->maxCreatureHp));
+
+    // Emergency
+    if (avatar->maxHp > 0)
+        ui->avatarHp->setText(QString::number(avatar->maxHp));
+    if (avatar->maxMp > 0)
+        ui->avatarMp->setText(QString::number(avatar->maxMp));
+
+    if (foodA->spell != nullptr)
+        ui->foodAInput->setCurrentIndex(ui->foodAInput->findText(QString::fromStdString(foodA->spell->name), Qt::MatchFixedString));
+    if (foodB->spell != nullptr)
+        ui->foodBInput->setCurrentIndex(ui->foodBInput->findText(QString::fromStdString(foodB->spell->name), Qt::MatchFixedString));
+
+    if ((foodA->maxHp < 100 || foodA->maxMp < 100) && (foodA->maxHp + foodA->maxMp - 100 > 0))
+        ui->foodAValue->setText(QString::number(foodA->maxHp + foodA->maxMp - 100));
+    if ((foodB->maxHp < 100 || foodB->maxMp < 100) && (foodB->maxHp + foodB->maxMp - 100 > 0))
+        ui->foodBValue->setText(QString::number(foodB->maxHp + foodB->maxMp - 100));
 
 
     // Magic Shield Manager
@@ -482,6 +553,13 @@ void Healer::on_exanaVitaHp_textChanged(const QString &arg1)
     rule->isDefaultValue = false;
 
     rule->enabled = rule->maxMp > 0 || rule->minHp > 0;
+
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->exanaVitaStatus->setChecked(rule->enabled);
 }
 
 
@@ -512,6 +590,13 @@ void Healer::on_exanaVitaMp_textChanged(const QString &arg1)
     rule->isDefaultValue = false;
 
     rule->enabled = rule->maxMp > 0 || rule->minHp > 0;
+
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->exanaVitaStatus->setChecked(rule->enabled);
 }
 
 void Healer::on_utamoVitaShield_textChanged(const QString &arg1)
@@ -531,5 +616,156 @@ void Healer::on_magicPotionShield_textChanged(const QString &arg1)
     rule->isDefaultValue = false;
 
     rule->enabled = rule->maxHp > 0;
+}
+
+
+void Healer::on_avatarHp_textChanged(const QString &arg1)
+{
+    ActionRule *rule = scriptConfig->getHealRule("avatar");
+    rule->maxHp = (arg1.toInt());
+    rule->maxMp = (ui->avatarMp->text().toInt());
+    rule->isDefaultValue = false;
+
+    rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
+
+    if (rule->maxHp == 0)
+        rule->maxHp = 100;
+    if (rule->maxMp == 0)
+        rule->maxMp = 100;
+}
+
+
+void Healer::on_avatarMp_textChanged(const QString &arg1)
+{
+    ActionRule *rule = scriptConfig->getHealRule("avatar");
+    rule->maxMp = (arg1.toInt());
+    rule->maxHp = (ui->avatarHp->text().toInt());
+    rule->isDefaultValue = false;
+
+    rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
+
+    if (rule->maxHp == 0)
+        rule->maxHp = 100;
+    if (rule->maxMp == 0)
+        rule->maxMp = 100;
+}
+
+std::map<std::string, bool> isManaFood = {
+    {"Blessed Steak", true},
+    {"Consecrated Beef", true},
+    {"Blueberry Cupcake", true},
+    };
+
+void Healer::on_foodAInput_currentTextChanged(const QString &arg1)
+{
+    ActionRule *rule = scriptConfig->getHealRule("foodA");
+    rule->spell = Globals::getSpell(arg1.toStdString());
+    rule->isDefaultValue = true;
+
+    if (arg1 == "Blueberry Cupcake")
+        rule->delayType1 = DelayType::CupcakeMp;
+    else if (arg1 == "Strawberry Cupcake")
+        rule->delayType1 = DelayType::CupcakeHp;
+    else
+        rule->delayType1 = DelayType::NpcFood;
+
+    if (isManaFood[arg1.toStdString()])
+    {
+        rule->maxHp = 100;
+        ui->foodAValueLabel->setText("Mana:");
+        ui->foodAValue->setPlaceholderText("Mp%");
+    }
+    else
+    {
+        rule->maxMp = 100;
+        ui->foodAValueLabel->setText("Health:");
+        ui->foodAValue->setPlaceholderText("Hp%");
+    }
+
+    ui->foodAValue->setText("");
+    rule->enabled = false;
+}
+
+
+void Healer::on_foodBInput_currentTextChanged(const QString &arg1)
+{
+    ActionRule *rule = scriptConfig->getHealRule("foodB");
+    rule->spell = Globals::getSpell(arg1.toStdString());
+    rule->isDefaultValue = true;
+
+    if (arg1 == "Blueberry Cupcake")
+        rule->delayType1 = DelayType::CupcakeMp;
+    else if (arg1 == "Strawberry Cupcake")
+        rule->delayType1 = DelayType::CupcakeHp;
+    else
+        rule->delayType1 = DelayType::NpcFood;
+
+
+    if (isManaFood[arg1.toStdString()])
+    {
+        rule->maxHp = 100;
+        ui->foodBValueLabel->setText("Mana:");
+        ui->foodBValue->setPlaceholderText("Mp%");
+    }
+    else
+    {
+        rule->maxMp = 100;
+        ui->foodBValueLabel->setText("Health:");
+        ui->foodBValue->setPlaceholderText("Hp%");
+    }
+
+    ui->foodBValue->setText("");
+    rule->enabled = false;
+}
+
+
+void Healer::on_foodAValue_textChanged(const QString &arg1)
+{
+    ActionRule *rule = scriptConfig->getHealRule("foodA");
+
+    if (isManaFood[ui->foodAInput->currentText().toStdString()])
+    {
+        rule->maxHp = 100;
+        rule->maxMp = (arg1.toInt());
+        if (rule->maxMp == 0)
+            rule->maxMp = 100;
+        rule->enabled = rule->maxMp < 100;
+        rule->isDefaultValue = !rule->enabled;
+    }
+    else
+    {
+        rule->maxMp = 100;
+        rule->maxHp = (arg1.toInt());
+        if (rule->maxHp == 0)
+            rule->maxHp = 100;
+        rule->enabled = rule->maxHp < 100;
+        rule->isDefaultValue = !rule->enabled;
+    }
+}
+
+
+void Healer::on_foodBValue_textChanged(const QString &arg1)
+{
+    ActionRule *rule = scriptConfig->getHealRule("foodB");
+    rule->isDefaultValue = false;
+
+    if (isManaFood[ui->foodBInput->currentText().toStdString()])
+    {
+        rule->maxHp = 100;
+        rule->maxMp = (arg1.toInt());
+        if (rule->maxMp == 0)
+            rule->maxMp = 100;
+        rule->enabled = rule->maxMp < 100;
+        rule->isDefaultValue = !rule->enabled;
+    }
+    else
+    {
+        rule->maxMp = 100;
+        rule->maxHp = (arg1.toInt());
+        if (rule->maxHp == 0)
+            rule->maxHp = 100;
+        rule->enabled = rule->maxHp < 100;
+        rule->isDefaultValue = !rule->enabled;
+    }
 }
 

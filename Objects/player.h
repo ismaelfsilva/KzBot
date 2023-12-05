@@ -31,6 +31,8 @@ public:
     int getUtamoPercent();
 
     int getLevel();
+    int getFoodTime();
+    std::vector<Icons> getConditions();
 private:
     uint32_t m_address;
 };

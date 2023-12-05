@@ -1,8 +1,11 @@
 #include "toolstab.h"
 #include "../Settings/globals.h"
+#include "mainwindow.h"
+#include "ui_hudstatuses.h"
 #include "ui_toolstab.h"
 #include "../Objects/inventoryitem.h"
 #include "../Objects/client.h"
+#include "../Objects/game.h"
 
 ToolsTab::ToolsTab(QWidget *parent) :
     QWidget(parent),
@@ -35,6 +38,9 @@ ToolsTab::ToolsTab(QWidget *parent) :
     antiParalyzeSpell->onParalyzeSpell = true;
     ActionRule* hasteSpell = scriptConfig->addToolsRule("hasteSpell", ActionType::Spell, nullptr);
     hasteSpell->hasteSpell = true;
+
+    ActionRule* manaTrainSpell = scriptConfig->addToolsRule("manaTrain", ActionType::Spell, nullptr);
+    manaTrainSpell->minMp = 95;
 
     ResetUi();
     UpdateUi();
@@ -71,6 +77,12 @@ void ToolsTab::on_ssaHp_textChanged(const QString &arg1)
 
     rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
     updateReadInventory();
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->autoSSAStatus->setChecked(rule->enabled);
 }
 
 void ToolsTab::on_ssaMp_textChanged(const QString &arg1)
@@ -81,6 +93,12 @@ void ToolsTab::on_ssaMp_textChanged(const QString &arg1)
 
     rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
     updateReadInventory();
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->autoSSAStatus->setChecked(rule->enabled);
 }
 
 
@@ -114,6 +132,11 @@ void ToolsTab::on_mightRingHp_textChanged(const QString &arg1)
 
     rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
     updateReadInventory();
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->autoMRStatus->setChecked(rule->enabled);
 }
 
 
@@ -125,10 +148,19 @@ void ToolsTab::on_mightRingMp_textChanged(const QString &arg1)
 
     rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
     updateReadInventory();
+
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->autoMRStatus->setChecked(rule->enabled);
 }
 
 void ToolsTab::ResetUi()
 {
+    ui->lineEdit->setText("");
+    ui->lineEdit_2->setText("");
+
     ui->antiParalyzeSpellInput->setText("");
     ui->hasteSpellInput->setText("");
 
@@ -156,6 +188,8 @@ void ToolsTab::UpdateUi()
     ActionRule *defaultAmuletEquip = scriptConfig->getToolsRule("defaultAmuletEquip");
     ActionRule *defaultRingEquip = scriptConfig->getToolsRule("defaultRingEquip");
 
+    ActionRule *manaTrainSpell = scriptConfig->getToolsRule("manaTrain");
+
     // Speed Manager
     if (antiParalyzeSpell->spell != nullptr)
         ui->antiParalyzeSpellInput->setText(QString::fromStdString(antiParalyzeSpell->spell->words));
@@ -182,6 +216,22 @@ void ToolsTab::UpdateUi()
         ui->defaultAmuletInput->setText(QString::number(defaultAmuletEquip->itemId));
     if (defaultRingEquip->itemId > 0)
         ui->defaultRingInput->setText(QString::number(defaultRingEquip->itemId));
+
+    // Mana Train
+
+    if (manaTrainSpell->spell != nullptr)
+        ui->lineEdit->setText(QString::fromStdString(manaTrainSpell->spell->words));
+    ui->checkBox_5->setChecked(scriptConfig->getToolsEatFood());
+
+    // General
+    ui->checkBox->setChecked(scriptConfig->getToolsAntiIdle());
+    ui->checkBox_2->setChecked(scriptConfig->getToolsHoldPosition());
+    ui->checkBox_3->setChecked(scriptConfig->getToolsEatFood());
+    if (scriptConfig->getToolsEatFoodId() > 0)
+        ui->lineEdit_2->setText(QString::number(scriptConfig->getToolsEatFoodId()));
+    ui->checkBox_4->setChecked(scriptConfig->getToolsAutoBuff());
+    if (scriptConfig->getToolsAutoBuffItemId() > 0)
+        ui->lineEdit_3->setText(QString::number(scriptConfig->getToolsAutoBuffItemId()));
 
     updateReadInventory();
 }
@@ -229,7 +279,11 @@ void ToolsTab::on_defaultRingInput_editingFinished()
 void ToolsTab::on_defaultAmuletRefresh_clicked()
 {
     std::map<InventorySlot, Objects::InventoryItem*> inventoryItems = Objects::Client::getInventoryItems();
-    ui->defaultAmuletInput->setText(QString::number(inventoryItems[InventorySlot::InventorySlotNecklace]->getId()));
+    if (inventoryItems.find(InventorySlot::InventorySlotNecklace) != inventoryItems.end())
+        ui->defaultAmuletInput->setText(QString::number(inventoryItems[InventorySlot::InventorySlotNecklace]->getId()));
+    else
+        ui->defaultAmuletInput->setText(QString::number(0));
+
     on_defaultAmuletInput_editingFinished();
 
     for (std::pair<InventorySlot, Objects::InventoryItem*> item : inventoryItems)
@@ -240,10 +294,74 @@ void ToolsTab::on_defaultAmuletRefresh_clicked()
 void ToolsTab::on_defaultRingRefresh_clicked()
 {
     std::map<InventorySlot, Objects::InventoryItem*> inventoryItems = Objects::Client::getInventoryItems();
-    ui->defaultRingInput->setText(QString::number(inventoryItems[InventorySlot::InventorySlotRing]->getId()));
+    if (inventoryItems.find(InventorySlot::InventorySlotRing) != inventoryItems.end())
+        ui->defaultRingInput->setText(QString::number(inventoryItems[InventorySlot::InventorySlotRing]->getId()));
+    else
+        ui->defaultRingInput->setText(QString::number(0));
+
     on_defaultRingInput_editingFinished();
 
     for (std::pair<InventorySlot, Objects::InventoryItem*> item : inventoryItems)
         delete item.second;
+}
+
+
+void ToolsTab::on_checkBox_stateChanged(int arg1)
+{
+    scriptConfig->setToolsAntiIdle(arg1);
+}
+
+
+void ToolsTab::on_checkBox_2_stateChanged(int arg1)
+{
+    scriptConfig->setToolsHoldPosition(arg1);
+    scriptConfig->setToolsHoldPositionPos(Objects::Client::getPlayerCreature(Objects::Client::getDataPointer())->getPosition());
+}
+
+
+void ToolsTab::on_checkBox_3_stateChanged(int arg1)
+{
+    scriptConfig->setToolsEatFood(ui->lineEdit_2->text().toInt() > 0 && arg1);
+}
+
+
+
+
+void ToolsTab::on_checkBox_5_stateChanged(int arg1)
+{
+    ActionRule *rule = scriptConfig->getToolsRule("manaTrain");
+    rule->isDefaultValue = false;
+
+    rule->enabled = ui->checkBox_5->isChecked() && rule->spell != nullptr;
+}
+
+
+void ToolsTab::on_lineEdit_editingFinished()
+{
+    ActionRule *rule = scriptConfig->getToolsRule("manaTrain");
+    rule->spell = Globals::getSpell(ui->lineEdit->text().toStdString());
+    rule->isDefaultValue = false;
+
+    rule->enabled = ui->checkBox_5->isChecked() && rule->spell != nullptr;
+}
+
+
+void ToolsTab::on_lineEdit_2_editingFinished()
+{
+    scriptConfig->setToolsEatFood(ui->lineEdit_2->text().toInt() > 0 && ui->checkBox_3->isChecked());
+    scriptConfig->setToolsEatFoodId(ui->lineEdit_2->text().toInt());
+}
+
+
+void ToolsTab::on_checkBox_4_stateChanged(int arg1)
+{
+    scriptConfig->setToolsAutoBuff(ui->lineEdit_3->text().toInt() > 0 && arg1);
+}
+
+
+void ToolsTab::on_lineEdit_3_editingFinished()
+{
+    scriptConfig->setToolsAutoBuff(ui->lineEdit_3->text().toInt() > 0 && ui->checkBox_4->isChecked());
+    scriptConfig->setToolsAutoBuffItemId(ui->lineEdit_3->text().toInt());
 }
 

@@ -17,6 +17,8 @@ Spell::Spell(QXmlStreamReader &reader)
         this->group = CooldownGroup::Support;
     else if (groupName == "item")
         this->group = CooldownGroup::Item;
+    else if (groupName == "food")
+        this->group = CooldownGroup::Food;
     else if (groupName == "equip")
         this->group = CooldownGroup::Equip;
 
@@ -33,10 +35,10 @@ Spell::Spell(QXmlStreamReader &reader)
     this->area = XmlAttributes.value("area").toInt();
     this->duration = XmlAttributes.value("duration").toInt();
     this->allowFarUse = !XmlAttributes.value("allowfaruse").isNull() && XmlAttributes.value("allowfaruse").toInt() == 1;
-    this->requiresTarget = !XmlAttributes.value("needtarget").isNull() || !XmlAttributes.value("casterTargetOrDirection").isNull();
+    this->requiresTarget = !XmlAttributes.value("needtarget").isNull(); //|| !XmlAttributes.value("casterTargetOrDirection").isNull();
     this->requiresRealTarget = !XmlAttributes.value("casterTargetOrDirection").isNull();
     this->requiresPlayerNameParam = !XmlAttributes.value("playernameparam").isNull();
-    this->selfTarget = !XmlAttributes.value("selftarget").isNull() && XmlAttributes.value("selftarget").toInt() == 1;
+    this->selfTarget = (!XmlAttributes.value("selftarget").isNull() && XmlAttributes.value("selftarget").toInt() == 1) || (!XmlAttributes.value("casterTargetOrDirection").isNull() && this->area > 0);
 
     reader.readNextStartElement();
     bool hasVocationsSet = false;

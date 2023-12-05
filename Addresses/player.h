@@ -16,6 +16,10 @@ public:
     static void setUtamo(uint32_t value) { m_utamo = value; }
     static void setUtamoMax(uint32_t value) { m_utamoMax = value; }
     static void setLevel(uint32_t value) { m_level = value; }
+    static void setFoodTime(uint32_t value) { m_foodTime = value; }
+
+    static void setStatusListStart(uint32_t value) { m_statusListStart = value; }
+    static void setStatusListEnd(uint32_t value) { m_statusListEnd = value; }
 
     static uint32_t getHealth() { return m_hp; }
     static uint32_t getHealthMax() { return m_hpMax; }
@@ -24,6 +28,10 @@ public:
     static uint32_t getUtamo() { return m_utamo; }
     static uint32_t getUtamoMax() { return m_utamoMax; }
     static uint32_t getLevel() { return m_level; }
+    static uint32_t getFoodTime() { return m_foodTime; }
+
+    static uint32_t getStatusListStart() { return m_statusListStart; }
+    static uint32_t getStatusListEnd() { return m_statusListEnd; }
 
 
 private:
@@ -34,6 +42,10 @@ private:
     static uint32_t m_utamo;
     static uint32_t m_utamoMax;
     static uint32_t m_level;
+    static uint32_t m_foodTime;
+
+    static uint32_t m_statusListStart;
+    static uint32_t m_statusListEnd;
 };
 
 }

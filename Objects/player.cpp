@@ -55,3 +55,29 @@ int Player::getLevel()
 {
     return Util::KzHelper::ReadMemoryUInt16(Globals::getHandle(), m_address + Addresses::Player::getLevel());
 }
+
+int Player::getFoodTime()
+{
+    return Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), m_address + Addresses::Player::getFoodTime());
+}
+
+std::vector<Icons> Player::getConditions()
+{
+    std::vector<Icons> conditionList;
+
+    // Reads Collection Root Node Pointer and Item Count
+    char conditionListData[0x8];
+    if (!Util::KzHelper::ReadMemory(Globals::getHandle(), m_address + Addresses::Player::getStatusListStart(), conditionListData, sizeof(conditionListData)))
+        return conditionList;
+
+    uint32_t listStart = *reinterpret_cast<uint32_t*>(conditionListData + 0x0);
+    uint32_t listEnd = *reinterpret_cast<uint32_t*>(conditionListData + 0x4);
+
+    for (uint32_t conditionAddress = listStart; conditionAddress < listEnd; conditionAddress += 0x4)
+    {
+        uint32_t conditionId = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), conditionAddress);
+        conditionList.push_back((Icons)conditionId);
+    }
+
+    return conditionList;
+}

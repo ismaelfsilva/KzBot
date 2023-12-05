@@ -10,6 +10,15 @@ ComboRule::ComboRule()
     spell = nullptr;
 }
 
+ComboRule::ComboRule(std::string _name)
+{
+    leader = _name;
+    content = "";
+    spellInput = "";
+    itemId = 0;
+    spell = nullptr;
+}
+
 
 bool ComboRule::Deserialize(QXmlStreamReader &reader)
 {
@@ -29,7 +38,6 @@ bool ComboRule::Deserialize(QXmlStreamReader &reader)
         spellInput = reader.attributes().value("spell").toString().toStdString();
         spell = Globals::getSpell(spellInput);
     }
-
 
     if (!reader.attributes().value("leader").isNull())
         leader = reader.attributes().value("leader").toString().toStdString();

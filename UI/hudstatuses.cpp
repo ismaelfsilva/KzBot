@@ -1,46 +1,50 @@
-#include "configchooser.h"
-#include "qlineedit.h"
-#include "qsettings.h"
-#include "ui_configchooser.h"
-#include "QMouseEvent"
+#include "hudstatuses.h"
+#include "mainwindow.h"
+#include "qevent.h"
+#include "ui_hudstatuses.h"
+#include <QKeySequenceEdit>
+#include <QMessageBox>
+#include <QSettings>
 #include <iostream>
 #include <ostream>
-#include <windows.h>
+#include <ui_mainwindow.h>
 #include "../Util/kzhelper.h"
 
-ConfigChooser::ConfigChooser(QWidget *parent) :
+
+HUDStatuses::HUDStatuses(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ConfigChooser)
+    ui(new Ui::HUDStatuses)
 {
     ui->setupUi(this);
-
-
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_TranslucentBackground);
+    //setAttribute(Qt::WA_PaintOnScreen);
 
     setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->moveHUD->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-    checkedButton = ui->defaultName;
-
-    QString checkButtonStyleSheet = "QPushButton {border: 0px; background-color: rgba(100, 100, 200, 200);} QPushButton:checked {background-color: rgba(0, 255, 0, 200)}";
-
+    QString checkButtonStyleSheet = "QPushButton {border: 0px; background-color: rgba(255, 0, 0, 200);} QPushButton:checked {background-color: rgba(0, 255, 0, 200)}";
 
     QSettings mySettings("KzSoft", "KzBot - Tibia");
     mySettings.sync();
-    this->move(mySettings.value("ConfigHudPos").toPoint());
+    this->move(mySettings.value("StatusHudPos").toPoint());
 
 
     for (auto control : this->children())
     {
-        if (control->objectName().endsWith("Name"))
+        if (control->objectName().endsWith("Status"))
         {
             ((QPushButton*)control)->setStyleSheet(checkButtonStyleSheet);
             connect((QPushButton*)control, &QPushButton::clicked, this, [control, this](int arg1) {
-                checkedButton->setChecked(true);
-                emit loadSetting(control->objectName());
+                emit changeStatus(control->objectName());
+            });
+            connect((QPushButton*)control, &QPushButton::toggled, this, [control](int arg1) {
+                if (arg1)
+                    control->setProperty("text", "On");
+                else
+                    control->setProperty("text", "Off");
             });
         }
         else if (control->objectName().endsWith("Key"))
@@ -53,9 +57,13 @@ ConfigChooser::ConfigChooser(QWidget *parent) :
                 lineEdit->setStyleSheet("text-align: center; border: 0px;background-color: rgba(100, 100, 200, 200);");
             }
 
+
+
             uint hotkeyId = hotkeyList.size();
-            QString statusName = control->objectName().replace("Key", "Name");
+            QString statusName = control->objectName().replace("Key", "Status");
             hotkeyList.push_back(statusName);
+
+
 
             connect((QKeySequenceEdit*)control, &QKeySequenceEdit::editingFinished, this, [this, control, hotkeyId, statusName]() {
                 QKeySequence keySequence = ((QKeySequenceEdit*)control)->keySequence();
@@ -98,29 +106,26 @@ ConfigChooser::ConfigChooser(QWidget *parent) :
     }
 }
 
-ConfigChooser::~ConfigChooser()
+HUDStatuses::~HUDStatuses()
 {
     delete ui;
 }
 
-
-
-bool ConfigChooser::nativeEvent(const QByteArray& eventType, void* message, qintptr* result)
+bool HUDStatuses::nativeEvent(const QByteArray& eventType, void* message, qintptr* result)
 {
     Q_UNUSED(eventType);
     Q_UNUSED(result);
     MSG* msg = static_cast<MSG*>(message);
     if (msg->message == WM_HOTKEY)
     {
-        checkedButton->setChecked(true);
-        emit loadSetting(hotkeyList[msg->wParam]);
+        emit changeStatus(hotkeyList[msg->wParam]);
     }
 
     return false;
     //return QMainWindow::nativeEvent(eventType, message, result);
 }
 
-void ConfigChooser::mousePressEvent( QMouseEvent *e )
+void HUDStatuses::mousePressEvent( QMouseEvent *e )
 {
     if ( e->button() == Qt::LeftButton ) {
         _mousePressed = true;
@@ -128,18 +133,18 @@ void ConfigChooser::mousePressEvent( QMouseEvent *e )
     }
 }
 
-void ConfigChooser::mouseMoveEvent( QMouseEvent *e )
+void HUDStatuses::mouseMoveEvent( QMouseEvent *e )
 {
     if ( _mousePressed ) {
         move( mapToParent( e->pos() - _mousePosition ) );
 
         QSettings mySettings("KzSoft", "KzBot - Tibia");
-        mySettings.setValue("ConfigHudPos", this->pos());
+        mySettings.setValue("StatusHudPos", this->pos());
         mySettings.sync();
     }
 }
 
-void ConfigChooser::mouseReleaseEvent( QMouseEvent *e )
+void HUDStatuses::mouseReleaseEvent( QMouseEvent *e )
 {
     if ( e->button() == Qt::LeftButton ) {
         _mousePressed = false;
@@ -147,10 +152,9 @@ void ConfigChooser::mouseReleaseEvent( QMouseEvent *e )
     }
 }
 
-void ConfigChooser::on_closeHUD_clicked()
+void HUDStatuses::on_closeHUD_clicked()
 {
     this->_isVisible = false;
     this->hide();
 }
-
 

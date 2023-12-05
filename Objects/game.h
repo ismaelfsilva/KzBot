@@ -107,6 +107,8 @@ public:
     static inline Position getPlayerPosition() { return m_playerPosition; }
     static inline Vocation getPlayerVocation() { return m_playerVocation; }
     static inline int getPlayerSpeed() { return m_playerSpeed; }
+    static inline uint64_t getPlayerLastWalk() { return m_playerLastWalk; }
+    static inline bool getPlayerOutOfPz() { return m_playerOutOfPz; }
     static inline Direction getPlayerDirection() { return m_playerDirection; }
 
     static int getPlayerHp() { return m_playerHp; }
@@ -122,12 +124,28 @@ public:
     static int getPlayerManaShieldPercent() { return m_playerManaShieldPercent; }
 
     static int getPlayerLevel() { return m_playerLevel; }
+    static int getPlayerFoodTime() { return m_playerFoodTime; }
+    static bool getPlayerIsHungry() { return m_playerFoodTime <= 0; }
+    static bool getPlayerHasStatus(Icons icon) { return m_playerConditions[icon]; }
+    static std::unordered_map<Icons, bool> getPlayerStatus() { return m_playerConditions; }
+
+    static int getPlayerTargetCount() { return m_comboCount; }
+    static int getPlayerAlliesAroundCount() { return m_alliesAround; }
+    static int getPlayerEnemiesAroundCount() { return m_enemiesAround; }
+    static std::map<Vocation, std::vector<CachedCreature>> getPlayerAlliesAround() { return m_alliesOnScreen; }
+    static std::map<Vocation, std::vector<CachedCreature>> getPlayerEnemiesAround() { return m_enemiesOnScreen; }
+    static std::map<uint32_t, uint64_t> getPlayerAlliesSeen() { return m_alliesSeen; }
+    static std::map<uint32_t, uint64_t> getPlayerEnemiesSeen() { return m_enemiesSeen; }
+    static std::map<uint32_t, uint64_t> getPlayerTargetedBy() { return m_targetedBy; }
+    static std::unordered_map<std::string, uint64_t> getUltimateExplosions() { return m_ultimateExplosions; };
+    static std::unordered_map<std::string, uint64_t> getAvatarTransformations() { return m_avatarTransformations; };
 
     static int getAmuletId() { return m_amuletId; };
     static int getRingId() { return m_ringId; };
 
 
     // Chat Data
+    static uint32_t m_lastSeenChatMessage;
     static std::vector<std::pair<std::string, std::string>> getNewChatMessages() { return m_newChatMessages; };
 
 private:
@@ -138,6 +156,8 @@ private:
     static Direction m_playerDirection;
     static Vocation m_playerVocation;
     static int m_playerSpeed;
+    static uint64_t m_playerLastWalk;
+    static bool m_playerOutOfPz;
 
     // Health
     static int m_playerHp;
@@ -155,6 +175,8 @@ private:
     static int m_playerManaShieldPercent;
 
     static int m_playerLevel;
+    static int m_playerFoodTime;
+    static std::unordered_map<Icons, bool> m_playerConditions;
 
     static uint32_t m_targetId;
     static uint32_t m_lastTargetId;
@@ -184,6 +206,11 @@ private:
     static int m_enemiesAround;
     static int m_playersAround;
     static int m_creaturesAround;
+    static std::map<uint32_t, uint64_t> m_targetedBy;
+    static std::map<uint32_t, uint64_t> m_enemiesSeen;
+    static std::map<uint32_t, uint64_t> m_alliesSeen;
+    static std::unordered_map<std::string, uint64_t> m_ultimateExplosions;
+    static std::unordered_map<std::string, uint64_t> m_avatarTransformations;
 
     static int m_creaturesKnightAreaSmall;
     static int m_creaturesKnightAreaDefault;
@@ -198,7 +225,6 @@ private:
     static std::vector<CachedHotkey> m_hotkeys;
 
     // Chat Area
-    static uint32_t m_lastSeenChatMessage;
     static std::vector<std::pair<std::string, std::string>> m_newChatMessages;
 
     // Inventory Area

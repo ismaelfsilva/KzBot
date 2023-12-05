@@ -9,3 +9,7 @@ uint32_t Player::m_manaMax;
 uint32_t Player::m_utamo;
 uint32_t Player::m_utamoMax;
 uint32_t Player::m_level;
+uint32_t Player::m_foodTime;
+
+uint32_t Player::m_statusListStart;
+uint32_t Player::m_statusListEnd;

@@ -50,13 +50,14 @@ public:
     GuildEmblem getGuild();
     PartyShield getPartyShield();
     SkullType getSkull();
+    bool isOutOfPz();
     bool isNear();
     Vocation getVocation();
 
     void Debug();
     bool hasWhiteSquare();
     bool hasBlackSquare();
-    uint32_t lastBlackSquareTick();
+    uint64_t lastBlackSquareTick();
 private:
     uint32_t m_id;
     uint32_t m_address;

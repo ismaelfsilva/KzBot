@@ -78,6 +78,7 @@ void Threads::Updater::m_threadFunc()
 
                 request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
+
                 QNetworkReply *reply = manager->post(request, postData);
 
                 // WAIT RESPONSE
@@ -153,44 +154,10 @@ void Threads::Updater::m_threadFunc()
         }
 
         // Pause/Unpause Area
-        bool canUseHotkeys = Globals::getAuthTickCount() > m_lastHotkeyTick;
-        if (GetAsyncKeyState(VK_PAUSE) & 0x0001 && canUseHotkeys)
-        {
-            emit changeStatus("general");
-            Beep(1000, 500);
-            m_lastHotkeyTick = Globals::getAuthTickCount() + 10;
-        }
+        //bool canUseHotkeys = Globals::getAuthTickCount() > m_lastHotkeyTick;
         if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
-        {
             Game::setLastTargetId(0);
-        }
 
-        // ScriptConfig Hotkeys
-        if (GetAsyncKeyState(0x31) & GetAsyncKeyState(VK_CONTROL) & 0x8000 && canUseHotkeys)
-        {
-            emit loadSetting("default.xml");
-            m_lastHotkeyTick = Globals::getAuthTickCount() + 10;
-        }
-        if (GetAsyncKeyState(0x32) & GetAsyncKeyState(VK_CONTROL) & 0x8000 && canUseHotkeys)
-        {
-            emit loadSetting("tank.xml");
-            m_lastHotkeyTick = Globals::getAuthTickCount() + 10;
-        }
-        if (GetAsyncKeyState(0x33) & GetAsyncKeyState(VK_CONTROL) & 0x8000 && canUseHotkeys)
-        {
-            emit loadSetting("swap.xml");
-            m_lastHotkeyTick = Globals::getAuthTickCount() + 10;
-        }
-        if (GetAsyncKeyState(0x34) & GetAsyncKeyState(VK_CONTROL) & 0x8000 && canUseHotkeys)
-        {
-            emit loadSetting("hunt.xml");
-            m_lastHotkeyTick = Globals::getAuthTickCount() + 10;
-        }
-        if (GetAsyncKeyState(0x35) & GetAsyncKeyState(VK_CONTROL) & 0x8000 && canUseHotkeys)
-        {
-            emit loadSetting("boss.xml");
-            m_lastHotkeyTick = Globals::getAuthTickCount() + 10;
-        }
 
         // Updater
         if (scriptConfig->getGeneralStatus())
@@ -199,9 +166,6 @@ void Threads::Updater::m_threadFunc()
             {
                 if (!Globals::isSet)
                     throw("Client not set.");
-
-                if (Objects::Client::getEquipmentPoint() == NULL)
-                    Objects::Client::updateEquipmentPoint();
 
                 if (Objects::Client::getGameScreenPlayerPoint() == nullptr)
                     Objects::Client::updateGameScreenRect();
@@ -282,7 +246,20 @@ void Threads::Updater::m_actionThreadFunc()
                     bool editedHotkey = false;
 
                     if (input->requiresRealTarget)
-                        Objects::Client::Target(Game::getDataPointer(), input->position);
+                    {
+                        if (scriptConfig->getPartyHuntUseTargetNext())
+                        {
+                            for (int i = 0; i < 100; i++)
+                            {
+                                Util::KzHelper::SendKey(scriptConfig->getPartyHuntTargetNextKey(), scriptConfig->getPartyHuntTargetNextKeyExtended());
+                                Sleep(1);
+                                if (Objects::Battlelist::getTargetId(Game::getDataPointer()) == input->targetId)
+                                    break;
+                            }
+                        }
+                        else if (Objects::Client::getGameScreenPlayerPoint() != nullptr)
+                            Objects::Client::Target(Game::getDataPointer(), input->position);
+                    }
                     else if (input->targetId)
                         Objects::Battlelist::setTargetId(Game::getDataPointer(), input->targetId);
 
@@ -335,7 +312,7 @@ void Threads::Updater::m_actionThreadFunc()
                         Util::KzHelper::SendKey(VK_F13);
                         Sleep(1);
 
-                        if (input->usesCrosshair)
+                        if (input->usesCrosshair && Objects::Client::getGameScreenPlayerPoint() != nullptr)
                         {
                             Util::KzHelper::LeftClick(Client::getSqmPoint(Game::getDataPointer(), input->position));
                             Sleep(1);

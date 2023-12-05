@@ -15,6 +15,7 @@ class PartyHunt : public QWidget
 public:
     explicit PartyHunt(QWidget *parent = nullptr);
     ~PartyHunt();
+    Ui::PartyHunt *ui;
 
     void UpdateUI();
     void ResetUI();
@@ -95,8 +96,9 @@ private slots:
 
     void on_knightUtitoTempoHp_textChanged(const QString &arg1);
 
+    void on_checkBox_clicked(bool checked);
+
 private:
-    Ui::PartyHunt *ui;
     ScriptConfig *scriptConfig;
 };
 

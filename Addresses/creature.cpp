@@ -25,6 +25,7 @@ uint32_t Creature::m_type;
 uint32_t Creature::m_guild;
 uint32_t Creature::m_party;
 uint32_t Creature::m_skull;
+uint32_t Creature::m_outPz;
 uint32_t Creature::m_isNear;
 uint32_t Creature::m_vocation;
 uint32_t Creature::m_mouseHovered;

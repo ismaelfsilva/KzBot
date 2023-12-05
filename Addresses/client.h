@@ -13,6 +13,7 @@ class Client
 public:
     static void setBaseAddress(uint32_t value) { m_baseAddress = value; }
     static void setDataPointer(uint32_t value) { m_dataPointer = value; }
+    static void setLoggedIn(uint32_t value) { m_loggedIn = value; }
     static void setCooldownsPointer(uint32_t value) { m_cooldownsPointer = value; }
     static void setCooldownsGroupCollection(uint32_t value) { m_cooldownsGroupCollection = value; }
     static void setCooldownsSpellsCollection(uint32_t value) { m_cooldownsSpellsCollection = value; }
@@ -22,6 +23,7 @@ public:
 
     static uint32_t getBaseAddress() { return m_baseAddress; }
     static uint32_t getDataPointer() { return m_dataPointer; }
+    static uint32_t getLoggedIn() { return m_loggedIn; }
 
     static uint32_t getCooldownsPointer() { return m_cooldownsPointer; }
     static uint32_t getCooldownsGroupCollection() { return m_cooldownsGroupCollection; }
@@ -29,13 +31,6 @@ public:
     static uint32_t getCooldownsSpellsCount() { return m_cooldownsSpellsCount; }
     static uint32_t getPlayerPointer() { return m_playerPointer; }
     static uint32_t getPlayerCreaturePointer() { return m_playerCreaturePointer; }
-
-    static void setUiCurrentText(std::vector<uint32_t> value) { m_uiCurrentText = value; }
-    static std::vector<uint32_t> getUiCurrentText() { return m_uiCurrentText; }
-
-
-    static void setUiChatStatus(std::vector<uint32_t> value) { m_uiChatStatus = value; }
-    static std::vector<uint32_t> getUiChatStatus() { return m_uiChatStatus; }
 
     static void setClientFocus(std::vector<uint32_t> value) { m_clientFocus = value; }
     static std::vector<uint32_t> getClientFocus() { return m_clientFocus; }
@@ -92,6 +87,7 @@ public:
     static uint32_t getHotkeyCollection() { return m_hotkeyCollection; };
 private:
     static uint32_t m_baseAddress;
+    static uint32_t m_loggedIn;
     static uint32_t m_dataPointer;
 
     static uint32_t m_cooldownsPointer;

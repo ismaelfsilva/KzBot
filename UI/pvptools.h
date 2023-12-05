@@ -14,6 +14,7 @@ class PvpTools : public QWidget
 public:
     explicit PvpTools(QWidget *parent = nullptr);
     ~PvpTools();
+    Ui::PvpTools *ui;
 
     void UpdateUi();
 private slots:
@@ -41,8 +42,19 @@ private slots:
 
     void on_combo3Input_textChanged(const QString &arg1);
 
+    void on_lineEdit_2_textChanged(const QString &arg1);
+
+    void on_lineEdit_3_textChanged(const QString &arg1);
+
+    void on_checkBox_10_stateChanged(int arg1);
+
+    void on_checkBox_11_stateChanged(int arg1);
+
+    void on_lineEdit_4_textChanged(const QString &arg1);
+
+    void on_lineEdit_5_textChanged(const QString &arg1);
+
 private:
-    Ui::PvpTools *ui;
 };
 
 #endif // PVPTOOLS_H

@@ -1,6 +1,10 @@
 #include "partyhunt.h"
+#include "mainwindow.h"
+#include "ui_hudstatuses.h"
 #include "ui_partyhunt.h"
 #include "../Settings/globals.h"
+#include "../Objects/client.h"
+#include <QMessageBox>
 
 PartyHunt::PartyHunt(QWidget *parent) :
     QWidget(parent),
@@ -26,8 +30,10 @@ PartyHunt::PartyHunt(QWidget *parent) :
     waveB->centerKnight = true;
     ActionRule* areaRune = scriptConfig->addTargetRule("areaRune", ActionType::Rune, "Avalanche Rune");
 
-    ActionRule* singleTargetA = scriptConfig->addTargetRule("singleTargetA", ActionType::Rune, nullptr);
-    ActionRule* singleTargetB = scriptConfig->addTargetRule("singleTargetB", ActionType::Rune, nullptr);
+    ActionRule* singleTargetA = scriptConfig->addTargetRule("singleTargetA", ActionType::Rune, "Sudden Death Rune");
+    singleTargetA->isDefaultValue = false;
+    ActionRule* singleTargetB = scriptConfig->addTargetRule("singleTargetB", ActionType::Rune, "Sudden Death Rune");
+    singleTargetB->isDefaultValue = false;
     ActionRule* msDebuff = scriptConfig->addTargetRule("msDebuff", ActionType::Spell, nullptr);
     msDebuff->centerKnight = true;
 
@@ -181,6 +187,7 @@ void PartyHunt::UpdateUI()
 
     // Others
     ui->autoTargetStatus->setChecked(scriptConfig->getPartyHuntAutoTargetStatus());
+    ui->checkBox->setChecked(scriptConfig->getPartyHuntUseTargetNext());
 }
 
 // Ultimate Spell
@@ -455,6 +462,12 @@ void PartyHunt::on_msDebuffCreatureQty_textChanged(const QString &arg1)
 void PartyHunt::on_autoTargetStatus_stateChanged(int arg1)
 {
     scriptConfig->setPartyHuntAutoTargetStatus(arg1);
+    ui->checkBox->setEnabled(arg1);
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    ((MainWindow*)parentPtr)->hudStatuses->ui->autoTargetStatus->setChecked(arg1);
 }
 
 void PartyHunt::on_knightSpellRotation_stateChanged(int arg1)
@@ -499,5 +512,29 @@ void PartyHunt::on_knightUtitoTempoHp_textChanged(const QString &arg1)
 {
     ActionRule* knightTargetRule = scriptConfig->getKnightTargetRule("utitoTempo");
     knightTargetRule->minHp = arg1.toInt();
+}
+
+void PartyHunt::on_checkBox_clicked(bool checked)
+{
+    if (checked)
+    {
+        for (Objects::KeyBinding* keyBinding : Objects::Client::getKeyBindings())
+        {
+            if (keyBinding->getName() == "AttackNextTarget")
+            {
+                scriptConfig->setPartyHuntUseTargetNext(checked);
+                bool ext;
+                scriptConfig->setPartyHuntTargetNextKey(keyBinding->getKey(ext));
+                scriptConfig->setPartyHuntTargetNextKeyExtended(ext);
+
+                return;
+            }
+        }
+        QMessageBox::critical(this, tr("Hotkey Missing"), tr("Kz Bot wasn't able to detect your Target Next Hotkey, make sure it's set."));
+        ui->checkBox->click();
+    }
+    else
+        scriptConfig->setPartyHuntUseTargetNext(checked);
+
 }
 

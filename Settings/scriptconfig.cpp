@@ -47,8 +47,15 @@ ScriptConfig::ScriptConfig()
     m_pvpParalyzeTarget = false;
     m_pvpDashTarget = false;
     m_pvpChatNaviStatus = true;
+    m_UEsToConsiderCombo = 3;
+    m_AvatarCountToConsiderCombo = 3;
 
     m_partyHuntStatus = false;
+
+    m_partyHuntUseTargetNext = false;
+    m_partyHuntTargetNextKey = 0x0;
+    m_partyHuntTargetNextKeyExtended = false;
+
     m_partyHuntUseFakeTarget = true;
     m_partyHuntAreaRune = true;
     m_partyHuntAutoTargetStatus = false;
@@ -59,6 +66,8 @@ ScriptConfig::ScriptConfig()
 
     m_toolsStatus = false;
     m_toolsReadInventory = false;
+
+
 }
 
 
@@ -237,6 +246,13 @@ void ScriptConfig::Serialize(QXmlStreamWriter &writer)
     // Tools
     writer.writeStartElement("Tools");
 
+    writer.writeTextElement("AntiIdle", std::to_string(m_toolsAntiIdle));
+    writer.writeTextElement("HoldPosition", std::to_string(m_toolsHoldPosition));
+    writer.writeTextElement("EatFood", std::to_string(m_toolsEatFood));
+    writer.writeTextElement("EatFoodId", std::to_string(m_toolsEatFoodId));
+    writer.writeTextElement("AutoBuff", std::to_string(m_toolsAutoBuff));
+    writer.writeTextElement("AutoBuffId", std::to_string(m_toolsBuffItemId));
+
     bool wroteToolsRulesStart = false;
     for (ActionRule* rule: ToolsRules)
     {
@@ -260,6 +276,14 @@ void ScriptConfig::Serialize(QXmlStreamWriter &writer)
     writer.writeTextElement("ParalyzeTarget", std::to_string(m_pvpParalyzeTarget));
     writer.writeTextElement("DashTarget", std::to_string(m_pvpDashTarget));
 
+    writer.writeTextElement("OnComboUE", std::to_string(m_pvpOnComboUE));
+    m_pvpOnComboUEActionA->Serialize(writer);
+    m_pvpOnComboUEActionB->Serialize(writer);
+
+    writer.writeTextElement("OnComboAvatar", std::to_string(m_pvpOnComboAvatar));
+    m_pvpOnComboAvatarActionA->Serialize(writer);
+    m_pvpOnComboAvatarActionB->Serialize(writer);
+
     bool wroteComboRulesStart = false;
     for (ComboRule* rule: ComboRules)
     {
@@ -279,6 +303,7 @@ void ScriptConfig::Serialize(QXmlStreamWriter &writer)
     // Party Hunt
     writer.writeStartElement("PartyHunt");
     writer.writeTextElement("AutoTarget", std::to_string(m_partyHuntAutoTargetStatus));
+    writer.writeTextElement("UseTargetNext", std::to_string(m_partyHuntUseTargetNext));
 
     bool wroteTargetingRulesStart = false;
     for (ActionRule* rule: TargetRules)
@@ -392,7 +417,38 @@ void ScriptConfig::Deserialize(QXmlStreamReader &reader)
                 while (!(reader.isEndElement() && reader.name().compare("Tools") == 0))
                 {
                     reader.readNext();
-                    if (reader.isStartElement() && reader.name().compare("Rules") == 0)
+
+                    if (reader.isStartElement() && reader.name().compare("AntiIdle") == 0)
+                    {
+                        reader.readNext();
+                        m_toolsAntiIdle = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("HoldPosition") == 0)
+                    {
+                        reader.readNext();
+                        m_toolsHoldPosition = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("EatFood") == 0)
+                    {
+                        reader.readNext();
+                        m_toolsEatFood = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("EatFoodId") == 0)
+                    {
+                        reader.readNext();
+                        m_toolsEatFoodId = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("AutoBuff") == 0)
+                    {
+                        reader.readNext();
+                        m_toolsAutoBuff = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("AutoBuffId") == 0)
+                    {
+                        reader.readNext();
+                        m_toolsBuffItemId = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("Rules") == 0)
                     {
                         while (!(reader.isEndElement() && reader.name().compare("Rules") == 0))
                         {
@@ -414,13 +470,19 @@ void ScriptConfig::Deserialize(QXmlStreamReader &reader)
                             }
                         }
                     }
+                    else if (reader.isStartElement() && reader.name().compare("Rules") == 0)
+                    {
+
+                    }
                 }
             }
             else if (reader.name().compare("PvP") == 0)
             {
+                int comboId = 0;
                 while (!(reader.isEndElement() && reader.name().compare("PvP") == 0))
                 {
                     reader.readNext();
+
 
                     if (reader.isStartElement() && reader.name().compare("HoldTarget") == 0)
                     {
@@ -437,6 +499,43 @@ void ScriptConfig::Deserialize(QXmlStreamReader &reader)
                         reader.readNext();
                         m_pvpDashTarget = reader.text().toString().toInt();
                     }
+
+
+                    else if (reader.isStartElement() && reader.name().compare("OnComboUE") == 0)
+                    {
+                        reader.readNext();
+                        m_pvpOnComboUE = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("OnComboAvatar") == 0)
+                    {
+                        reader.readNext();
+                        m_pvpOnComboAvatar = reader.text().toString().toInt();
+                    }
+
+                    else if (reader.isStartElement() && reader.name().compare("Combo") == 0)
+                    {
+                        switch (comboId)
+                        {
+                        case 0:
+                            m_pvpOnComboUEActionA->Deserialize(reader);
+                            break;
+                        case 1:
+                            m_pvpOnComboUEActionB->Deserialize(reader);
+                            break;
+                        case 2:
+                            m_pvpOnComboAvatarActionA->Deserialize(reader);
+                            break;
+                        case 3:
+                            m_pvpOnComboAvatarActionB->Deserialize(reader);
+                            break;
+                        }
+
+                        comboId++;
+                        reader.readNext();
+                    }
+
+
+
                     else if (reader.isStartElement() && reader.name().compare("Rules") == 0)
                     {
                         int i = 0;
@@ -462,6 +561,11 @@ void ScriptConfig::Deserialize(QXmlStreamReader &reader)
                     {
                         reader.readNext();
                         m_partyHuntAutoTargetStatus = reader.text().toString().toInt();
+                    }
+                    else if (reader.isStartElement() && reader.name().compare("UseTargetNext") == 0)
+                    {
+                        reader.readNext();
+                        m_partyHuntUseTargetNext = reader.text().toString().toInt();
                     }
                     else if (reader.isStartElement() && reader.name().compare("Caster") == 0)
                     {

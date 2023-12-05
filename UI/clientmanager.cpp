@@ -81,24 +81,15 @@ void ClientManager::RefreshClients()
 
         std::string idString = std::to_string(idInt);
         std::string processName = Util::KzHelper::getWindowTitle(hwnd);
-        std::filesystem::path path = Util::KzHelper::getWindowPath(hwnd).parent_path().parent_path();
 
-        std::string filePath = path.string();
-        filePath.append("\\package.json");
-
-        QFile file;
-        file.setFileName(QString::fromLatin1(filePath));
-        file.open(QIODevice::ReadOnly | QIODevice::Text);
-        QByteArray val = file.readAll();
-        file.close();
-        QJsonDocument doc = QJsonDocument::fromJson(val);
-        QJsonObject jObject = doc.object();
-        QVariantMap mainMap = jObject.toVariantMap();
-
+        HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, idInt);
+        uint32_t baseAddress = Util::KzHelper::GetProcessBaseAddress(idInt, processHandle);
 
         QTableWidgetItem *idItem = new QTableWidgetItem(QString::fromStdString(idString));
         QTableWidgetItem *nameItem = new QTableWidgetItem(QString::fromStdString(processName.substr(8)));
-        QTableWidgetItem *versionItem = new QTableWidgetItem(mainMap["version"].toString());
+        QTableWidgetItem *versionItem = new QTableWidgetItem(QString::fromStdString(Addresses::Versions::getVersion(processHandle, baseAddress)));
+
+        CloseHandle(processHandle);
 
         idItem->setTextAlignment(Qt::AlignCenter);
         nameItem->setTextAlignment(Qt::AlignCenter);
@@ -142,7 +133,7 @@ void ClientManager::on_pushButton_2_clicked()
     Globals::setHWnd(hWnd);
     Globals::setProcessId(pId);
     Globals::setHandle(OpenProcess(PROCESS_ALL_ACCESS, FALSE, pId));
-    Globals::setBaseAddress(Util::KzHelper::GetProcessBaseAddress(pId));
+    Globals::setBaseAddress(Util::KzHelper::GetProcessBaseAddress(pId, Globals::getHandle()));
     Addresses::Versions::setVersion(selectedItems[2]->text().toStdString());
     Objects::Client::updateEquipmentPoint();
     Objects::Client::updateGameScreenRect();

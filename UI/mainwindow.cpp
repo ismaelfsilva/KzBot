@@ -5,8 +5,10 @@
 #include "partyhunt.h"
 #include "pvptools.h"
 #include "qapplication.h"
+#include "qsettings.h"
 #include "ui_configchooser.h"
 #include "toolstab.h"
+#include "ui_hudstatuses.h"
 #include "ui_mainwindow.h"
 #include <QWidget>
 #include <iostream>
@@ -25,6 +27,10 @@
 #include "../Objects/game.h"
 #include "../Objects/chat.h"
 #include "../Addresses/client.h"
+#include "../Addresses/inventory.h"
+#include "../Addresses/inventoryitem.h"
+#include "ui_partyhunt.h"
+#include "ui_pvptools.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -34,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qRegisterMetaType<HWND>("HWND");
     Globals::UpdateSpells();
+    hudStatuses = new HUDStatuses();
+    hudPvP = new HUDPvP();
 
     QTabBar *tabBar = ui->tabWidget->tabBar();
     generalStatusCheckBox = new QCheckBox("Status", this);
@@ -51,7 +59,10 @@ MainWindow::MainWindow(QWidget *parent) :
                     configHelper->setFocus();
                 }
                 else
+                {
                     Globals::getScriptConfig()->setGeneralStatus(arg1);
+                    hudStatuses->ui->generalStatus->setChecked(arg1);
+                }
 
                 delete keyBinding;
             }
@@ -59,7 +70,10 @@ MainWindow::MainWindow(QWidget *parent) :
                 generalStatusCheckBox->click();
         }
         else
+        {
             Globals::getScriptConfig()->setGeneralStatus(arg1);
+            hudStatuses->ui->generalStatus->setChecked(arg1);
+        }
     });
     ui->tabWidget->setCornerWidget(generalStatusCheckBox);
 
@@ -68,8 +82,9 @@ MainWindow::MainWindow(QWidget *parent) :
     healer = new Healer(this);
     int healerTabId = ui->tabWidget->addTab(healer, healer->windowTitle());
     healerCheckBox = new QCheckBox(this);
-    connect(healerCheckBox, &QCheckBox::stateChanged, this, [](int arg1) {
+    connect(healerCheckBox, &QCheckBox::stateChanged, this, [this](int arg1) {
         Globals::getScriptConfig()->setHealerStatus(arg1);
+        hudStatuses->ui->healerStatus->setChecked(arg1);
     });
     tabBar->setTabButton(healerTabId, QTabBar::LeftSide, healerCheckBox);
 
@@ -77,8 +92,9 @@ MainWindow::MainWindow(QWidget *parent) :
     tools = new ToolsTab(this);
     int toolsTabId = ui->tabWidget->addTab(tools, tools->windowTitle());
     toolsCheckBox = new QCheckBox(this);
-    connect(toolsCheckBox, &QCheckBox::stateChanged, this, [](int arg1) {
+    connect(toolsCheckBox, &QCheckBox::stateChanged, this, [this](int arg1) {
         Globals::getScriptConfig()->setToolsStatus(arg1);
+        hudStatuses->ui->toolsStatus->setChecked(arg1);
     });
     tabBar->setTabButton(toolsTabId, QTabBar::LeftSide, toolsCheckBox);
 
@@ -86,8 +102,9 @@ MainWindow::MainWindow(QWidget *parent) :
     pvpTools = new PvpTools(this);
     int pvpToolsTabId = ui->tabWidget->addTab(pvpTools, pvpTools->windowTitle());
     pvpToolsCheckBox = new QCheckBox(this);
-    connect(pvpToolsCheckBox, &QCheckBox::stateChanged, this, [](int arg1) {
+    connect(pvpToolsCheckBox, &QCheckBox::stateChanged, this, [this](int arg1) {
         Globals::getScriptConfig()->setPvPToolsStatus(arg1);
+        hudStatuses->ui->pvpStatus->setChecked(arg1);
     });
     tabBar->setTabButton(pvpToolsTabId, QTabBar::LeftSide, pvpToolsCheckBox);
 
@@ -95,8 +112,9 @@ MainWindow::MainWindow(QWidget *parent) :
     partyHunt = new PartyHunt(this);
     int partyHuntTabId = ui->tabWidget->addTab(partyHunt, partyHunt->windowTitle());
     partyHuntCheckBox = new QCheckBox(this);
-    connect(partyHuntCheckBox, &QCheckBox::stateChanged, this, [](int arg1) {
+    connect(partyHuntCheckBox, &QCheckBox::stateChanged, this, [this](int arg1) {
         Globals::getScriptConfig()->setPartyHuntStatus(arg1);
+        hudStatuses->ui->targetingStatus->setChecked(arg1);
     });
     tabBar->setTabButton(partyHuntTabId, QTabBar::LeftSide, partyHuntCheckBox);
 
@@ -105,15 +123,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-
-
-
-
-
-
-
-
     configChooser = new ConfigChooser();
+
+    connect(hudStatuses, &HUDStatuses::changeStatus, this, &MainWindow::changeStatusSignal);
+
     connect(updaterThread, &Threads::Updater::hasFocus, this, &MainWindow::onTibiaClientFocusChange);
     connect(configChooser, &ConfigChooser::loadSetting, this, &MainWindow::loadSettingSignal);
     connect(updaterThread, &Threads::Updater::loadSetting, this, &MainWindow::loadSettingSignal);
@@ -121,6 +134,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
+    hudStatuses->ui->chatNaviStatus->setChecked(Globals::getScriptConfig()->getPvPChatNaviStatus());
 
     LoadSetting("Settings/default.xml");
 }
@@ -131,6 +145,7 @@ MainWindow::~MainWindow()
     updaterThread->Stop();
     Globals::closeHandle();
 }
+
 
 void MainWindow::on_Form_StartUp()
 {
@@ -186,30 +201,87 @@ void MainWindow::on_actionDefault_2_triggered()
 
 void MainWindow::changeStatusSignal(const QString& statusName)
 {
-    generalStatusCheckBox->click();
+    if (statusName == "generalStatus")
+    {
+        generalStatusCheckBox->click();
+        Beep(1000, 500);
+    }
+
+
+
+
+    else if (statusName == "healerStatus")
+        healerCheckBox->click();
+    else if (statusName == "exanaVitaStatus")
+        Globals::getScriptConfig()->getHealRule("exanaVitaSpell")->enabled = !Globals::getScriptConfig()->getHealRule("exanaVitaSpell")->enabled;
+    else if (statusName == "healFriendStatus")
+    {
+        Globals::getScriptConfig()->getHealRule("strongHealFriend")->enabled = !Globals::getScriptConfig()->getHealRule("strongHealFriend")->enabled;
+        Globals::getScriptConfig()->getHealRule("healFriend")->enabled = !Globals::getScriptConfig()->getHealRule("healFriend")->enabled;
+        Globals::getScriptConfig()->getHealRule("uhRune")->enabled = !Globals::getScriptConfig()->getHealRule("uhRune")->enabled;
+    }
+
+
+
+    else if (statusName == "toolsStatus")
+        toolsCheckBox->click();
+    else if (statusName == "autoSSAStatus")
+        Globals::getScriptConfig()->getToolsRule("stoneSkinAmuletEquip")->enabled = !Globals::getScriptConfig()->getToolsRule("stoneSkinAmuletEquip")->enabled;
+    else if (statusName == "autoMRStatus")
+        Globals::getScriptConfig()->getToolsRule("mightRingEquip")->enabled = !Globals::getScriptConfig()->getToolsRule("mightRingEquip")->enabled;
+
+
+
+
+
+
+    else if (statusName == "pvpStatus")
+        pvpToolsCheckBox->click();
+    else if (statusName == "gotoTargetStatus")
+        pvpTools->ui->checkBox_2->click();
+    else if (statusName == "comboUEStatus")
+        pvpTools->ui->checkBox_10->click();
+    else if (statusName == "chatNaviStatus")
+    {
+        Game::m_lastSeenChatMessage = 0;
+        Globals::getScriptConfig()->setPvPChatNaviStatus(!Globals::getScriptConfig()->getPvPChatNaviStatus());
+    }
+
+
+
+    else if (statusName == "targetingStatus")
+        partyHuntCheckBox->click();
+    else if (statusName == "autoTargetStatus")
+        partyHunt->ui->autoTargetStatus->click();
+
 }
 
 void MainWindow::loadSettingSignal(QString fileName)
 {
-    bool loadSuccess = LoadSetting("Settings/" + fileName);
+    QString finalFileName = fileName;
+    if (finalFileName.endsWith("Name"))
+        finalFileName = finalFileName.replace("Name", ".xml");
+
+    bool loadSuccess = LoadSetting("Settings/" + finalFileName);
     if (!loadSuccess)
     {
         QApplication::beep();
         return;
     }
+    else
+    {
+        if (finalFileName == "default.xml")
+            configChooser->ui->defaultName->setChecked(true);
+        else if (finalFileName == "tank.xml")
+            configChooser->ui->tankName->setChecked(true);
+        else if (finalFileName == "swap.xml")
+            configChooser->ui->swapName->setChecked(true);
+        else if (finalFileName == "hunt.xml")
+            configChooser->ui->huntName->setChecked(true);
+        else if (finalFileName == "boss.xml")
+            configChooser->ui->bossName->setChecked(true);
+    }
 
-    configChooser->_lastFileName = fileName;
-
-    if (fileName == "default.xml")
-        configChooser->ui->pushButton->setChecked(true);
-    else if (fileName == "tank.xml")
-        configChooser->ui->pushButton_2->setChecked(true);
-    else if (fileName == "swap.xml")
-        configChooser->ui->pushButton_3->setChecked(true);
-    else if (fileName == "hunt.xml")
-        configChooser->ui->pushButton_4->setChecked(true);
-    else if (fileName == "boss.xml")
-        configChooser->ui->pushButton_5->setChecked(true);
 
     Beep(1000, 500);
 }
@@ -240,6 +312,8 @@ bool MainWindow::LoadSetting(QString fileName, bool errorMessage)
         partyHunt->UpdateUI();
         pvpTools->UpdateUi();
         this->UpdateUi();
+
+        hudStatuses->ui->chatNaviStatus->setChecked(Globals::getScriptConfig()->getPvPChatNaviStatus());
         return true;
     }
     return false;
@@ -255,21 +329,33 @@ void MainWindow::UpdateUi()
     generalStatusCheckBox->setChecked(Globals::getScriptConfig()->getGeneralStatus());
 }
 
-void MainWindow::on_actionShow_Config_Selector_toggled(bool arg1)
-{
-    if (arg1)
-        configChooser->show();
-    else
-        configChooser->hide();
-}
 
 void MainWindow::onTibiaClientFocusChange(const HWND& focusedHWnd)
 {
-    bool hasFocus = focusedHWnd == Globals::getHWnd() || focusedHWnd == (HWND)this->winId() || focusedHWnd == (HWND)configChooser->winId();
-    if (configChooser->isHidden() && hasFocus && ui->actionShow_Config_Selector->isChecked())
-        configChooser->show();
-    else if (!configChooser->isHidden() && !hasFocus)
-        configChooser->hide();
+    bool hasFocus = focusedHWnd == Globals::getHWnd() || focusedHWnd == (HWND)this->winId()  || focusedHWnd == (HWND)configChooser->winId()
+                    || focusedHWnd == (HWND)hudStatuses->winId() || focusedHWnd == (HWND)hudPvP->winId();
+    if (hasFocus)
+    {
+        if (configChooser->isHidden() && configChooser->_isVisible)
+            configChooser->show();
+
+        if (hudStatuses->isHidden() && hudStatuses->_isVisible)
+            hudStatuses->show();
+
+        if (hudPvP->isHidden() && hudPvP->_isVisible)
+            hudPvP->show();
+    }
+    else if (!hasFocus)
+    {
+        if (!configChooser->isHidden())
+            configChooser->hide();
+
+        if (!hudStatuses->isHidden())
+            hudStatuses->hide();
+
+        if (!hudPvP->isHidden())
+            hudPvP->hide();
+    }
 }
 
 void MainWindow::on_actionTank_triggered()
@@ -338,12 +424,14 @@ void MainWindow::on_actionOther_triggered()
                                                     tr("Load Script"), "",
                                                     tr("Xml File (*.xml);;All Files (*)"));
 
-    configChooser->_lastFileName = fileName;
 
     if (fileName.isEmpty())
         return;
     else
+    {
+        configChooser->ui->otherName->setChecked(true);
         LoadSetting(fileName, true);
+    }
 }
 
 void MainWindow::on_actionOther_2_triggered()
@@ -352,12 +440,13 @@ void MainWindow::on_actionOther_2_triggered()
                                                     tr("Save Script"), "",
                                                     tr("Xml File (*.xml);;All Files (*)"));
 
-    configChooser->_lastFileName = fileName;
-
     if (fileName.isEmpty())
         return;
     else
+    {
+        configChooser->ui->otherName->setChecked(true);
         SaveSetting(fileName, true);
+    }
 }
 
 
@@ -368,5 +457,43 @@ void MainWindow::on_actionInitial_Config_triggered()
 {
     ConfigHelper* configHelper = new ConfigHelper(this);
     configHelper->show();
+}
+
+
+void MainWindow::on_actionLogout_triggered()
+{
+    QSettings mySettings("KzSoft", "KzBot - Tibia");
+    mySettings.setValue("remember", false);
+    mySettings.setValue("email", NULL);
+    mySettings.setValue("password", NULL);
+    mySettings.setValue("loginauto", NULL);
+    mySettings.sync();
+    QApplication::quit();
+}
+
+
+void MainWindow::on_actionStatus_triggered()
+{
+    hudStatuses->_isVisible = true;
+    hudStatuses->show();
+}
+
+
+void MainWindow::on_actionPvP_triggered()
+{
+    hudPvP->_isVisible = true;
+    hudPvP->show();
+}
+
+
+void MainWindow::on_actionConfig_Selector_triggered()
+{
+    configChooser->_isVisible = true;
+    configChooser->show();
+}
+
+
+void MainWindow::on_actionv0_1_10_0_triggered()
+{
 }
 

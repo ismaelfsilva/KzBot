@@ -1,25 +1,25 @@
-#ifndef CONFIGCHOOSER_H
-#define CONFIGCHOOSER_H
+#ifndef HUDSTATUSES_H
+#define HUDSTATUSES_H
 
-#include "qpushbutton.h"
 #include <QWidget>
 
 namespace Ui {
-class ConfigChooser;
+class HUDStatuses;
 }
 
-class ConfigChooser : public QWidget
+class HUDStatuses : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ConfigChooser(QWidget *parent = nullptr);
-    ~ConfigChooser();
-    Ui::ConfigChooser *ui;
+    explicit HUDStatuses(QWidget *parent = nullptr);
+    ~HUDStatuses();
+    Ui::HUDStatuses *ui;
 
     bool _isVisible = false;
+
     bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result);
-    QPushButton* checkedButton;
+
 
 protected:
     virtual void mousePressEvent( QMouseEvent *e );
@@ -27,8 +27,7 @@ protected:
     virtual void mouseReleaseEvent( QMouseEvent *e );
 
 signals:
-    void loadSetting(const QString& fileName);
-
+    void changeStatus(const QString& statusName);
 
 private slots:
     void on_closeHUD_clicked();
@@ -39,4 +38,4 @@ private:
     QPoint _mousePosition;
 };
 
-#endif // CONFIGCHOOSER_H
+#endif // HUDSTATUSES_H

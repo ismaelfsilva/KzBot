@@ -39,6 +39,22 @@ private slots:
 
     void on_defaultRingRefresh_clicked();
 
+    void on_checkBox_stateChanged(int arg1);
+
+    void on_checkBox_2_stateChanged(int arg1);
+
+    void on_checkBox_3_stateChanged(int arg1);
+
+    void on_checkBox_5_stateChanged(int arg1);
+
+    void on_lineEdit_editingFinished();
+
+    void on_lineEdit_2_editingFinished();
+
+    void on_checkBox_4_stateChanged(int arg1);
+
+    void on_lineEdit_3_editingFinished();
+
 private:
     ScriptConfig *scriptConfig;
     Ui::ToolsTab *ui;

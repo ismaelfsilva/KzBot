@@ -53,6 +53,9 @@ set(PROJECT_SOURCES
         UI/clientmanager.cpp
         UI/clientmanager.ui
 
+        UI/hudstatuses.h UI/hudstatuses.cpp UI/hudstatuses.ui
+        UI/hudpvp.h UI/hudpvp.cpp UI/hudpvp.ui
+
         Addresses/hotkey.h Addresses/hotkey.cpp
         Addresses/chatmessage.h Addresses/chatmessage.cpp
         Addresses/chat.h Addresses/chat.cpp
@@ -65,6 +68,9 @@ set(PROJECT_SOURCES
 
         Addresses/client.cpp
         Addresses/client.h
+
+        Addresses/inventory.h Addresses/inventory.cpp
+        Addresses/inventoryitem.h Addresses/inventoryitem.cpp
 
         Addresses/creature.cpp
         Addresses/creature.h
@@ -79,6 +85,7 @@ set(PROJECT_SOURCES
         Objects/position.h Objects/position.cpp
         Objects/spell.h Objects/spell.cpp
         Objects/game.h Objects/game.cpp
+        Objects/inventory.h Objects/inventory.cpp
 
         Objects/client.h Objects/client.cpp
 
@@ -160,7 +167,7 @@ set_target_properties(KzBot PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
-    MSP PROPERTIES LINK_FLAGS  "/SUBSYSTEM:WINDOWS" # "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\"
+    MSP PROPERTIES LINK_FLAGS  "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:WINDOWS"
 )
 
 

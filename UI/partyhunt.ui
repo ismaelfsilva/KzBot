@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>461</width>
-    <height>522</height>
+    <height>524</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,14 +31,34 @@
       </property>
       <item>
        <widget class="QWidget" name="widget" native="true">
-        <layout class="QGridLayout" name="gridLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <property name="bottomMargin">
           <number>9</number>
          </property>
-         <item row="0" column="0">
+         <item>
           <widget class="QCheckBox" name="autoTargetStatus">
+           <property name="font">
+            <font>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Can make the character walk
+We recommend not using it without using Target Next as a Mage
+As paladin, will try to target the creature in the best spot for Diamond Arrow</string>
+           </property>
            <property name="text">
             <string>Auto Target</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Use Target Next</string>
            </property>
           </widget>
          </item>
@@ -280,6 +300,14 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="font">
+            <font>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Only works in party with EK</string>
+           </property>
            <property name="text">
             <string>Wave 2</string>
            </property>
@@ -386,6 +414,14 @@
              <horstretch>1</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Only works in party with EK</string>
            </property>
            <property name="text">
             <string>Wave 1</string>
@@ -780,6 +816,14 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="font">
+            <font>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Will use on EK if in a party</string>
+           </property>
            <property name="text">
             <string>MS Debuff</string>
            </property>
@@ -1052,6 +1096,48 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>autoTargetStatus</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>ultimateSpellStatus</tabstop>
+  <tabstop>ultimateSpellInput</tabstop>
+  <tabstop>ultimateSpellCreatureQty</tabstop>
+  <tabstop>ultimateSpellMaxHp</tabstop>
+  <tabstop>areaSpellStatus</tabstop>
+  <tabstop>areaSpellInput</tabstop>
+  <tabstop>areaSpellCreatureQty</tabstop>
+  <tabstop>waveAStatus</tabstop>
+  <tabstop>waveAInput</tabstop>
+  <tabstop>waveACreatureQty</tabstop>
+  <tabstop>waveATurn</tabstop>
+  <tabstop>waveBStatus</tabstop>
+  <tabstop>waveBInput</tabstop>
+  <tabstop>waveBCreatureQty</tabstop>
+  <tabstop>waveBTurn</tabstop>
+  <tabstop>areaRuneStatus</tabstop>
+  <tabstop>areaRuneInput</tabstop>
+  <tabstop>areaRuneCreatureQty</tabstop>
+  <tabstop>singleTargetAStatus</tabstop>
+  <tabstop>singleTargetAInput</tabstop>
+  <tabstop>singleTargetACreatureQty</tabstop>
+  <tabstop>singleTargetAMaxHp</tabstop>
+  <tabstop>singleTargetBStatus</tabstop>
+  <tabstop>singleTargetBInput</tabstop>
+  <tabstop>singleTargetBCreatureQty</tabstop>
+  <tabstop>singleTargetBMaxHp</tabstop>
+  <tabstop>msDebuffStatus</tabstop>
+  <tabstop>msDebuffInput</tabstop>
+  <tabstop>msDebuffCreatureQty</tabstop>
+  <tabstop>knightSpellRotation</tabstop>
+  <tabstop>radioButton</tabstop>
+  <tabstop>radioButton_2</tabstop>
+  <tabstop>knightExetaRes</tabstop>
+  <tabstop>knightAutoStrafe</tabstop>
+  <tabstop>knightUtamoTempoStatus</tabstop>
+  <tabstop>knightUtamoTempoHp</tabstop>
+  <tabstop>knightUtitoTempoStatus</tabstop>
+  <tabstop>knightUtitoTempoHp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

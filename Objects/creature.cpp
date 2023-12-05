@@ -130,6 +130,11 @@ SkullType Creature::getSkull()
     return (SkullType)Util::KzHelper::ReadMemoryByte(Globals::getHandle(), m_address + Addresses::Creature::getSkull());
 }
 
+bool Creature::isOutOfPz()
+{
+    return Util::KzHelper::ReadMemoryByte(Globals::getHandle(), m_address + Addresses::Creature::getOutOfPz()) == 1;
+}
+
 bool Creature::isNear()
 {
     return Util::KzHelper::ReadMemoryByte(Globals::getHandle(), m_address + Addresses::Creature::getIsNear()) == 1;
@@ -145,9 +150,9 @@ bool Creature::hasBlackSquare()
     return Util::KzHelper::ReadMemoryByte(Globals::getHandle(), m_address + Addresses::Creature::getHasBlackSquare()) == 1;
 }
 
-uint32_t Creature::lastBlackSquareTick()
+uint64_t Creature::lastBlackSquareTick()
 {
-    return Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), m_address + Addresses::Creature::getLastBlackSquareTick());
+    return Util::KzHelper::ReadMemoryUInt64(Globals::getHandle(), m_address + Addresses::Creature::getLastBlackSquareTick());
 }
 
 Vocation Creature::getVocation()

@@ -12,6 +12,7 @@ class ActionRule
 {
 public:
     ActionRule();
+    ActionRule(std::string _name);
 
     // BASIC CONFIG
 

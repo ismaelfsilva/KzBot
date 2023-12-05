@@ -55,9 +55,6 @@ public:
     static void parseHotkey(QJsonValue& jsonValue, int chatStatus = -1);
     static actionSettings* getHotkeyByText(std::string words);
     static actionSettings* getHotkeyByItemId(int itemId);
-    static std::string getCurrentUiText();
-    static void setCurrentUiText(std::string text);
-    static ChatStatus getChatStatus(uint32_t dataPointer);
     static actionSettings *getHotkeyByItemId(int itemId, std::string useType);
     static std::vector<Cooldown *> getCooldowns(uint32_t dataPointer);
     static Cooldown *getCooldown(uint32_t dataPointer, int cId);

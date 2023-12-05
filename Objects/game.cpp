@@ -4,6 +4,7 @@
 #include "battlelist.h"
 #include "chat.h"
 #include <iostream>
+#include "../Util/Enums.h"
 
 using namespace Objects;
 
@@ -20,6 +21,8 @@ Vocation Game::m_playerVocation;
 uint32_t Game::m_targetId;
 uint32_t Game::m_lastTargetId;
 int Game::m_playerSpeed;
+bool Game::m_playerOutOfPz;
+uint64_t Game::m_playerLastWalk;
 
 int Game::m_playerHp;
 int Game::m_playerHpMax;
@@ -36,6 +39,8 @@ int Game::m_playerManaShieldMax;
 int Game::m_playerManaShieldPercent;
 
 int Game::m_playerLevel;
+int Game::m_playerFoodTime;
+std::unordered_map<Icons, bool> Game::m_playerConditions;
 
 std::unordered_map<uint32_t, uint64_t> Game::m_cooldownGroups;
 std::unordered_map<uint32_t, uint64_t> Game::m_cooldownSpells;
@@ -68,6 +73,11 @@ int Game::m_alliesAround;
 int Game::m_enemiesAround;
 int Game::m_playersAround;
 int Game::m_creaturesAround;
+std::map<uint32_t, uint64_t> Game::m_targetedBy;
+std::map<uint32_t, uint64_t> Game::m_enemiesSeen;
+std::map<uint32_t, uint64_t> Game::m_alliesSeen;
+std::unordered_map<std::string, uint64_t> Game::m_ultimateExplosions;
+std::unordered_map<std::string, uint64_t> Game::m_avatarTransformations;
 
 bool Game::m_canUseHealItem;
 std::unordered_map<DelayType, uint64_t> Game::m_castDelays;
@@ -80,6 +90,8 @@ std::vector<std::pair<std::string, std::string>> Game::m_newChatMessages;
 // Inventory
 uint32_t Game::m_amuletId = 0;
 uint32_t Game::m_ringId = 0;
+
+Vocation lastVoc = Vocation::None;
 
 void Game::Update()
 {
@@ -100,16 +112,40 @@ void Game::Update()
     // Mana Shield
     m_playerManaShield = playerData->getUtamo();
     m_playerManaShieldMax = playerData->getUtamoMax();
-    m_playerManaShieldPercent = std::max(0.0, (double)((double)m_playerManaShield / (double)m_playerManaShieldMax) * 100.0);
+    if (m_playerManaShield <= 0)
+        m_playerManaShieldPercent = 0;
+    else
+        m_playerManaShieldPercent = std::min(100.0, std::ceil((double)((double)m_playerManaShield / (double)m_playerManaShieldMax) * 100.0));
 
     m_playerLevel = playerData->getLevel();
+    m_playerFoodTime = playerData->getFoodTime();
+    std::unordered_map<Icons, bool> _playerConditions;
+    for (Icons icon : playerData->getConditions())
+        _playerConditions[icon] = true;
+    m_playerConditions = _playerConditions;
 
     m_playerCreature = Client::getPlayerCreature(m_dataPointer);
 
     m_playerPosition = m_playerCreature->getPosition();
     m_playerDirection = m_playerCreature->getDirection();
     m_playerVocation = m_playerCreature->getVocation();
+
+    if (m_playerVocation != lastVoc)
+    {
+        lastVoc = m_playerVocation;
+        if (m_playerVocation == Vocation::Knight)
+            Globals::getScriptConfig()->getHealRule("avatar")->spell = Globals::getSpell("uteta res eq");
+        else if (m_playerVocation == Vocation::Paladin)
+            Globals::getScriptConfig()->getHealRule("avatar")->spell = Globals::getSpell("uteta res sac");
+        else if (m_playerVocation == Vocation::Sorcerer)
+            Globals::getScriptConfig()->getHealRule("avatar")->spell = Globals::getSpell("uteta res ven");
+        else if (m_playerVocation == Vocation::Druid)
+            Globals::getScriptConfig()->getHealRule("avatar")->spell = Globals::getSpell("uteta res dru");
+    }
+
     m_playerSpeed = m_playerCreature->getSpeed();
+    m_playerOutOfPz = m_playerCreature->isOutOfPz();
+    m_playerLastWalk = m_playerCreature->getLastWalkTime();
 
     // Game Data
     m_gamePing = Client::getPing(m_dataPointer);
@@ -177,6 +213,7 @@ void Game::Update()
         _c.Position = c->getPosition();
         _c.Type = type;
         _c.Id = c->getId();
+        _c.Health = c->getHpPc();
 
         if (type == CreatureType::Player)
         {
@@ -202,7 +239,6 @@ void Game::Update()
                 {
                     if (Globals::getScriptConfig()->getHealFriendStatus(vocation))
                     {
-                        _c.Health = c->getHpPc();
                         if (_c.Health < _friendToHeal.Health && _c.Health <= Globals::getScriptConfig()->getHealFriendHealth(vocation))
                         {
                             if (m_playerVocation == Vocation::Druid)
@@ -217,11 +253,6 @@ void Game::Update()
             if (Globals::getScriptConfig()->getPartyHuntStatus() && isPartyAlly && vocation == Vocation::Knight)
             {
                 m_partyKnight = _c;
-            }
-            if (Globals::getScriptConfig()->getPvPToolslsStatus() && (!isGuildAlly && !isPartyAlly) && c->lastBlackSquareTick() - m_gameTime < 10000)
-            {
-                _c.isAttackingMe = true;
-                _comboCount++;
             }
 
 
@@ -242,6 +273,31 @@ void Game::Update()
             }
 
 
+
+
+            if (isGuildAlly || isPartyAlly)
+            {
+                _c.Name = c->getName();
+                _alliesOnScreen[vocation].push_back(_c);
+                m_alliesSeen[_c.Id] = m_gameTime;
+                _alliesAround++;
+            }
+            else
+            {
+                _c.Name = c->getName();
+                _enemiesOnScreen[vocation].push_back(_c);
+                m_enemiesSeen[_c.Id] = m_gameTime;
+                _enemiesAround++;
+
+                uint64_t lastBlackSquareTick = c->lastBlackSquareTick();
+                if (lastBlackSquareTick > 0)
+                {
+                    m_targetedBy[_c.Id] = lastBlackSquareTick;
+                    _c.isAttackingMe = true;
+                    _comboCount++;
+                }
+            }
+
         }
         else if (type == CreatureType::Monster && Globals::getScriptConfig()->getPartyHuntStatus())
         {
@@ -260,7 +316,6 @@ void Game::Update()
             }
 
             // SÓ SE SINGLE TARGET ESTIVER ATIVO
-            _c.Health = c->getHpPc();
             if (!_creaturesOnScreen.empty() && _c.Health < _creaturesOnScreen.front().Health)
                 _creaturesOnScreen.insert(_creaturesOnScreen.begin(), _c);
             else
@@ -355,7 +410,7 @@ void Game::Update()
     m_canUseHealItem = (!Globals::getScriptConfig()->getRespectAttackTurns() || m_cooldownGroups[(int)CooldownGroup::Attack] > 0 || (Globals::getScriptConfig()->getPartyHuntStatus() && m_creaturesAround < 1));
 
     // Chat Data
-    if (Globals::getScriptConfig()->getPvPToolslsStatus() && Globals::getScriptConfig()->getPvPChatNaviStatus())
+    if (Globals::getScriptConfig()->getPvPToolslsStatus() && (Globals::getScriptConfig()->getPvPChatNaviStatus() || Globals::getScriptConfig()->getPvPOnComboUE() || Globals::getScriptConfig()->getPvPOnComboAvatar()))
     {
         std::map<uint32_t, ChatMessage*> defaultChannelMessages = Objects::Chat::getDefaultChannel(m_dataPointer);
         uint32_t newLastSeenMessage = m_lastSeenChatMessage;
@@ -368,7 +423,16 @@ void Game::Update()
             {
                 newLastSeenMessage = msg.first;
                 if (!firstUpdate)
-                    m_newChatMessages.push_back({msg.second->getSender(), msg.second->getContent()});
+                {
+                    std::string msgSender = msg.second->getSender();
+                    std::string msgContent = msg.second->getContent();
+                    m_newChatMessages.push_back({msgSender, msgContent});
+
+                    if (msgContent.rfind("exevo gran mas ", 0) == 0)
+                        m_ultimateExplosions[msgSender] = m_gameTime;
+                    else if (msgContent.rfind("uteta res ", 0) == 0)
+                        m_avatarTransformations[msgSender] = m_gameTime;
+                }
             }
             delete msg.second;
         }
