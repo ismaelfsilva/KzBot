@@ -1,9 +1,11 @@
 #include "pvptools.h"
 #include "mainwindow.h"
+#include "qsettings.h"
 #include "ui_hudstatuses.h"
 #include "ui_pvptools.h"
 #include "../Settings/globals.h"
 #include "../Objects/game.h"
+#include "../Util/kzhelper.h"
 
 PvpTools::PvpTools(QWidget *parent) :
     QWidget(parent),
@@ -17,14 +19,127 @@ PvpTools::PvpTools(QWidget *parent) :
     Globals::getScriptConfig()->m_pvpOnComboAvatarActionA = new ComboRule("ComboAvatarA");
     Globals::getScriptConfig()->m_pvpOnComboAvatarActionB = new ComboRule("ComboAvatarB");
 
-    Globals::getScriptConfig()->ComboRules.push_back(new ComboRule());
-    Globals::getScriptConfig()->ComboRules.push_back(new ComboRule());
-    Globals::getScriptConfig()->ComboRules.push_back(new ComboRule());
+    Globals::getScriptConfig()->ComboRules.emplace_back(new ComboRule());
+    Globals::getScriptConfig()->ComboRules.emplace_back(new ComboRule());
+    Globals::getScriptConfig()->ComboRules.emplace_back(new ComboRule());
+
+
+    ui->clearTileKey->setMaximumSequenceLength(1);
+    ui->protSqmKey->setMaximumSequenceLength(1);
+    ui->comboKey->setMaximumSequenceLength(1);
+
+    ui->clearTileKey->setClearButtonEnabled(true);
+    ui->protSqmKey->setClearButtonEnabled(true);
+    ui->comboKey->setClearButtonEnabled(true);
+
+    if(QLineEdit *lineEdit = ui->clearTileKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+        lineEdit->setPlaceholderText("Key");
+        lineEdit->setAlignment(Qt::AlignCenter);
+    }
+
+    if(QLineEdit *lineEdit = ui->protSqmKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+        lineEdit->setPlaceholderText("Key");
+        lineEdit->setAlignment(Qt::AlignCenter);
+    }
+
+    if(QLineEdit *lineEdit = ui->comboKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+        lineEdit->setPlaceholderText("Key");
+        lineEdit->setAlignment(Qt::AlignCenter);
+    }
+
+    QSettings mySettings("KzSoft", "KzBot - Tibia");
+    mySettings.sync();
+    ui->clearTileKey->setKeySequence(QKeySequence::fromString(mySettings.value("clearTileKey").toString()));
+    ui->clearTileKey->editingFinished();
+
+    ui->protSqmKey->setKeySequence(QKeySequence::fromString(mySettings.value("protSqmKey").toString()));
+    ui->protSqmKey->editingFinished();
+
+
 }
 
 PvpTools::~PvpTools()
 {
     delete ui;
+}
+
+
+bool PvpTools::nativeEvent(const QByteArray& eventType, void* message, qintptr* result)
+{
+    Q_UNUSED(eventType);
+    Q_UNUSED(result);
+    MSG* msg = static_cast<MSG*>(message);
+    if (msg->message == WM_HOTKEY)
+    {
+        if (!Globals::isSet) // Client not set
+            return false;
+
+        if (GetForegroundWindow() != Globals::getHWnd() || !Globals::getScriptConfig()->getGeneralStatus() || !Globals::getScriptConfig()->getPvPToolslsStatus())
+            return false;
+
+        switch (msg->wParam)
+        {
+        case 101: // Flor
+        {
+            if (ui->protSqmStatus->isChecked())
+            {
+                POINT p;
+                GetCursorPos(&p);
+                ScreenToClient(GetForegroundWindow(), &p);
+                Util::KzHelper::DragDrop(&Globals::getScriptConfig()->flowerSourcePoint, &p);
+            }
+            break;
+        }
+        case 102: // Clear
+        {
+            if (ui->clearTileStatus->isChecked())
+            {
+                POINT p;
+                GetCursorPos(&p);
+                ScreenToClient(GetForegroundWindow(), &p);
+                Util::KzHelper::DragDrop(&p, &Globals::getScriptConfig()->clearTileDestPoint);
+            }
+            break;
+        }
+        case 103:
+        {
+            if (Objects::Game::getTargetId() <= 0)
+                break;
+
+            for (auto* rule : Globals::getScriptConfig()->m_pvpSingleTargetComboRules)
+            {
+                if (rule->spell == nullptr || Game::isSpellOnCooldown(rule->spell) || (rule->itemId == 0 && !rule->spell->vocations[Game::getPlayerVocation()]) || (rule->spell->range > 0 && rule->spell->range < Game::getTargetedCreature().Position.getDistance(Game::getPlayerPosition())))
+                    continue;
+
+                Input* input = new Input();
+
+                input->gameTime = Game::getGameTime();
+                input->canRepeat = true;
+
+                if (rule->itemId > 0)
+                {
+                    input->itemId = rule->itemId;
+                    input->itemUseType = ItemUseType::UseOnTarget;
+                }
+                else if (!rule->spellInput.empty())
+                {
+                    input->text = rule->spellInput;
+                }
+
+                Globals::addInput(input);
+
+
+                break;
+            }
+        }
+        default:
+            break;
+        }
+
+    }
+
+    return false;
+    //return QMainWindow::nativeEvent(eventType, message, result);
 }
 
 void PvpTools::UpdateUi()
@@ -355,5 +470,200 @@ void PvpTools::on_lineEdit_5_textChanged(const QString &arg1)
 
         rule->spellInput = arg1.toStdString();
     }
+}
+
+
+void PvpTools::on_clearTileDest_clicked()
+{
+    SetForegroundWindow(Globals::getHWnd());
+    Sleep(200);
+    while (GetForegroundWindow() == Globals::getHWnd())
+    {
+        if (GetAsyncKeyState(VK_LBUTTON) & 1)
+        {
+            GetCursorPos(&Globals::getScriptConfig()->clearTileDestPoint);
+            ScreenToClient(GetForegroundWindow(), &Globals::getScriptConfig()->clearTileDestPoint);
+
+            ui->clearTileDest->setText("Destination {x: " + QString::number(Globals::getScriptConfig()->clearTileDestPoint.x) + " y: " + QString::number(Globals::getScriptConfig()->clearTileDestPoint.y) + "}");
+            break;
+        }
+    }
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    SetForegroundWindow((HWND)((MainWindow*)parentPtr)->winId());
+}
+
+
+void PvpTools::on_protSqmFlowerSource_clicked()
+{
+    SetForegroundWindow(Globals::getHWnd());
+    Sleep(200);
+    while (GetForegroundWindow() == Globals::getHWnd())
+    {
+        if (GetAsyncKeyState(VK_LBUTTON) & 1)
+        {
+            GetCursorPos(&Globals::getScriptConfig()->flowerSourcePoint);
+            ScreenToClient(GetForegroundWindow(), &Globals::getScriptConfig()->flowerSourcePoint);
+            
+            ui->protSqmFlowerSource->setText("Source {x: " + QString::number(Globals::getScriptConfig()->flowerSourcePoint.x) + " y: " + QString::number(Globals::getScriptConfig()->flowerSourcePoint.y) + "}");
+            break;
+        }
+    }
+
+    QObject* parentPtr = this->parent();
+    while (parentPtr->parent() != nullptr)
+        parentPtr = parentPtr->parent();
+    SetForegroundWindow((HWND)((MainWindow*)parentPtr)->winId());
+    ((MainWindow*)parentPtr)->activateWindow();
+}
+
+
+void PvpTools::on_protSqmKey_editingFinished()
+{
+    QKeySequence keySequence = ui->protSqmKey->keySequence();
+    UnregisterHotKey(HWND(winId()), 101);
+
+    QSettings mySettings("KzSoft", "KzBot - Tibia");
+    mySettings.setValue("protSqmKey", keySequence.toString());
+    mySettings.sync();
+
+    if(QLineEdit *lineEdit = ui->protSqmKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+        lineEdit->setPlaceholderText("Key");
+    }
+
+    if (!keySequence.isEmpty())
+    {
+        uint32_t modifiers = 0;
+        if (keySequence[0].keyboardModifiers() & Qt::ShiftModifier)
+            modifiers |= MOD_SHIFT;
+        if (keySequence[0].keyboardModifiers() & Qt::ControlModifier)
+            modifiers |= MOD_CONTROL;
+        if (keySequence[0].keyboardModifiers() & Qt::AltModifier)
+            modifiers |= MOD_ALT;
+
+        bool ext;
+        if (!RegisterHotKey(HWND(winId()), 101, modifiers, Util::KzHelper::qtKeyToVK(keySequence[0].key(), ext)))
+        {
+            ui->protSqmKey->clear();
+            if(QLineEdit *lineEdit = ui->protSqmKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+                lineEdit->setPlaceholderText("Key");
+            }
+        }
+    }
+}
+
+
+void PvpTools::on_clearTileKey_editingFinished()
+{
+    QKeySequence keySequence = ui->clearTileKey->keySequence();
+    UnregisterHotKey(HWND(winId()), 102);
+
+    QSettings mySettings("KzSoft", "KzBot - Tibia");
+    mySettings.setValue("clearTileKey", keySequence.toString());
+    mySettings.sync();
+
+    if(QLineEdit *lineEdit = ui->clearTileKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+        lineEdit->setPlaceholderText("Key");
+    }
+
+    if (!keySequence.isEmpty())
+    {
+        uint32_t modifiers = 0;
+        if (keySequence[0].keyboardModifiers() & Qt::ShiftModifier)
+            modifiers |= MOD_SHIFT;
+        if (keySequence[0].keyboardModifiers() & Qt::ControlModifier)
+            modifiers |= MOD_CONTROL;
+        if (keySequence[0].keyboardModifiers() & Qt::AltModifier)
+            modifiers |= MOD_ALT;
+
+        bool ext;
+        if (!RegisterHotKey(HWND(winId()), 102, modifiers, Util::KzHelper::qtKeyToVK(keySequence[0].key(), ext)))
+        {
+            ui->clearTileKey->clear();
+            if(QLineEdit *lineEdit = ui->clearTileKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+                lineEdit->setPlaceholderText("Key");
+            }
+        }
+    }
+}
+
+
+void PvpTools::on_comboInput_textChanged(const QString &arg1)
+{
+    Globals::getScriptConfig()->m_pvpSingleTargetComboRules.clear();
+    // Get Spells / Items
+    for (auto input : ui->comboInput->text().trimmed().split(";"))
+    {
+        input = input.trimmed();
+        ComboRule* rule = new ComboRule();
+
+        rule->itemId = 0;
+        rule->spellInput = "";
+        rule->spell = nullptr;
+
+        if (input.toInt() > 0)
+        {
+            Spell* s = Globals::getSpell(input.toInt());
+            if (s != nullptr)
+                rule->spell = s;
+
+            rule->itemId = input.toInt();
+            std::cout << rule->itemId << std::endl;
+        }
+        else
+        {
+            Spell* s = Globals::getSpell(input.toStdString());
+            if (s != nullptr)
+                rule->spell = s;
+
+            rule->spellInput = input.toStdString();
+        }
+
+        Globals::getScriptConfig()->m_pvpSingleTargetComboRules.emplace_back(rule);
+    }
+}
+
+
+void PvpTools::on_comboKey_editingFinished()
+{
+    // Register Hotkey
+    QKeySequence keySequence = ui->comboKey->keySequence();
+    UnregisterHotKey(HWND(winId()), 103);
+
+    QSettings mySettings("KzSoft", "KzBot - Tibia");
+    mySettings.setValue("singleTargetComboKey", keySequence.toString());
+    mySettings.sync();
+
+    if(QLineEdit *lineEdit = ui->clearTileKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+        lineEdit->setPlaceholderText("Key");
+    }
+
+    if (!keySequence.isEmpty())
+    {
+        uint32_t modifiers = 0;
+        if (keySequence[0].keyboardModifiers() & Qt::ShiftModifier)
+            modifiers |= MOD_SHIFT;
+        if (keySequence[0].keyboardModifiers() & Qt::ControlModifier)
+            modifiers |= MOD_CONTROL;
+        if (keySequence[0].keyboardModifiers() & Qt::AltModifier)
+            modifiers |= MOD_ALT;
+
+        bool ext;
+        if (!RegisterHotKey(HWND(winId()), 103, modifiers, Util::KzHelper::qtKeyToVK(keySequence[0].key(), ext)))
+        {
+            ui->comboKey->clear();
+            if(QLineEdit *lineEdit = ui->comboKey->findChild<QLineEdit*>("qt_keysequenceedit_lineedit")){
+                lineEdit->setPlaceholderText("Key");
+            }
+        }
+    }
+}
+
+
+void PvpTools::on_comboStatus_stateChanged(int arg1)
+{
+    Globals::getScriptConfig()->m_pvpSingleTargetComboStatus = arg1;
 }
 

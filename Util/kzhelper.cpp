@@ -250,6 +250,21 @@ void Util::KzHelper::SendKey(uint32_t key, bool extended)
     SendMessage(Globals::getHWnd(), WM_KEYUP, key, getlParam(key, true, extended));
 }
 
+void Util::KzHelper::DragDrop(int fromX, int fromY, int toX, int toY)
+{
+    uint32_t lParamFrom = MAKELPARAM(fromX, fromY);
+    uint32_t lParamTo = MAKELPARAM(toX, toY);
+    SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParamFrom);
+    SendMessage(Globals::getHWnd(), WM_LBUTTONDOWN, MK_LBUTTON, lParamFrom);
+    SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, MK_LBUTTON, lParamTo);
+    SendMessage(Globals::getHWnd(), WM_LBUTTONUP, 0x0, lParamTo);
+}
+
+void Util::KzHelper::DragDrop(POINT* from, POINT* to)
+{
+    DragDrop(from->x, from->y, to->x, to->y);
+}
+
 void Util::KzHelper::LeftClick(int x, int y)
 {
     uint32_t lParam = MAKELPARAM(x, y);
@@ -261,11 +276,7 @@ void Util::KzHelper::LeftClick(int x, int y)
 
 void Util::KzHelper::LeftClick(Point* p)
 {
-    uint32_t lParam = MAKELPARAM(p->x, p->y);
-    SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParam);
-    SendMessage(Globals::getHWnd(), WM_LBUTTONDOWN, MK_LBUTTON, lParam);
-    SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParam);
-    SendMessage(Globals::getHWnd(), WM_LBUTTONUP, 0x0, lParam);
+    LeftClick(p->x, p->y);
 }
 
 void Util::KzHelper::RightClick(int x, int y)
@@ -279,11 +290,7 @@ void Util::KzHelper::RightClick(int x, int y)
 
 void Util::KzHelper::RightClick(Point* p)
 {
-    uint32_t lParam = MAKELPARAM(p->x, p->y);
-    SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParam);
-    SendMessage(Globals::getHWnd(), WM_RBUTTONDOWN, MK_RBUTTON, lParam);
-    SendMessage(Globals::getHWnd(), WM_MOUSEMOVE, 0x0, lParam);
-    SendMessage(Globals::getHWnd(), WM_RBUTTONUP, 0x0, lParam);
+    RightClick(p->x, p->y);
 }
 
 void Util::KzHelper::SendText(std::string text, bool lockKeyboard)

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "../Objects/position.h"
+#include <windows.h>
 
 class ScriptConfig
 {
@@ -39,7 +40,7 @@ public:
     void setHealFriendGranSioHp(int value) { m_healFriendGranSioHp = value; };
     int getHealFriendGranSioHp() { return m_healFriendGranSioHp; };
 
-
+    uint32_t minAntiSpamDelay = 100;
     std::map<DelayType, uint64_t> TypeDelay = {
         {DelayType::EquipAmulet, 500},
         {DelayType::EquipRing, 500},
@@ -52,6 +53,7 @@ public:
         {DelayType::CupcakeHp, 600000},
         {DelayType::CupcakeMp, 600000},
         {DelayType::Utamo, 500},
+        {DelayType::AttackSpell, 500},
     };
 
 
@@ -69,6 +71,10 @@ public:
 
     void setPvPChatNaviStatus(bool value) { m_pvpChatNaviStatus = value; };
     bool getPvPChatNaviStatus() { return m_pvpChatNaviStatus; };
+
+    bool m_pvpSingleTargetComboStatus;
+    std::vector<ComboRule*> m_pvpSingleTargetComboRules;
+
 
     std::vector<ComboRule*> ComboRules;
 
@@ -176,6 +182,10 @@ public:
     ActionRule *addTargetRule(std::string name, ActionType type, Spell* spell = nullptr);
     ActionRule *addTargetRule(std::string name, ActionType type, std::string spellId);
     ActionRule *getTargetRule(std::string name);
+
+
+    POINT clearTileDestPoint;
+    POINT flowerSourcePoint;
 private:
     bool m_generalStatus = false;
 

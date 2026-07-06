@@ -22,7 +22,8 @@ std::string Addresses::Versions::getVersion(HANDLE& handle, uint32_t baseAddress
         0x11D8188, // 13.21.13775
         0x011D817C, // 13.21.13810; 13.21.13839
         0x11D516C, // 13.21.14172
-        0x11E5424, // 13.22.14282
+        0x11E5424, // 13.22.14282; 13.22.14242
+        0x123C0A4, // 13.30.14423; 13.30.14428; 13.30.14434
     };
 
     for (uint32_t clientDataPointer : clientDataPointers)
@@ -54,6 +55,8 @@ bool Addresses::Versions::isSupportedVersion(std::string versionString)
         return true;
     else if (versionString == "13.20.13560") // Hellgate
         return true;
+    else if (versionString == "13.20.13673") // Hellgate
+        return true;
     else if (versionString == "13.20.13623") // Hades
         return true;
     else if (versionString == "13.20.13709") // Arcana
@@ -70,7 +73,15 @@ bool Addresses::Versions::isSupportedVersion(std::string versionString)
         return true;
     else if (versionString == "13.22.14282") //
         return true;
-    else if (versionString == "13.22.14366") // Rubini Ferumbrinha
+    else if (versionString == "13.22.14242") //
+        return true;
+    else if (versionString == "13.22.14366") // Ferumbrinha
+        return true;
+    else if (versionString == "13.30.14423") //
+        return true;
+    else if (versionString == "13.30.14428") // Rubini
+        return true;
+    else if (versionString == "13.30.14434") // Ferumbrinha
         return true;
 }
 
@@ -81,6 +92,8 @@ void Addresses::Versions::setVersion(std::string versionString)
     if (versionString == "13.10.12892") // Pandora
         Addresses::Versions::setV131012892(Globals::getBaseAddress());
     else if (versionString == "13.20.13560") // Hellgate
+        Addresses::Versions::setV132013560(Globals::getBaseAddress());
+    else if (versionString == "13.20.13673") // Hellgate
         Addresses::Versions::setV132013560(Globals::getBaseAddress());
     else if (versionString == "13.20.13623") // Hades
         Addresses::Versions::setV132013623(Globals::getBaseAddress());
@@ -97,9 +110,17 @@ void Addresses::Versions::setVersion(std::string versionString)
     else if (versionString == "13.21.14172") // Rubini
         Addresses::Versions::setV132114172(Globals::getBaseAddress());
     else if (versionString == "13.22.14282") //
+        Addresses::Versions::setV132114172(Globals::getBaseAddress());
+    else if (versionString == "13.22.14242") //
         Addresses::Versions::setV132214282(Globals::getBaseAddress());
-    else if (versionString == "13.22.14366") // Rubini Ferumbrinha
+    else if (versionString == "13.22.14366") // Rubini
         Addresses::Versions::setV132214366(Globals::getBaseAddress());
+    else if (versionString == "13.30.14423") //
+        Addresses::Versions::setV133014423(Globals::getBaseAddress());
+    else if (versionString == "13.30.14428") // Rubini
+        Addresses::Versions::setV133014423(Globals::getBaseAddress());
+    else if (versionString == "13.30.14434") // Ferumbrinha
+        Addresses::Versions::setV133014423(Globals::getBaseAddress());
 }
 
 void Addresses::Versions::setV130512827(uint32_t baseAddress) // 13.05.12827
@@ -239,6 +260,17 @@ void Addresses::Versions::setV132214366(uint32_t baseAddress) // 13.22.14366
 
     Addresses::Client::setClientFocus({0x1225044 + baseAddress, 0x10, 0x20, 0x8});
     Addresses::Client::setInventoryPointer(0x1224F44 + baseAddress); // +0x4 = DESLOGADO 3F; LOGADO +
+
+    Addresses::Versions::setOffsetsA();
+}
+
+void Addresses::Versions::setV133014423(uint32_t baseAddress) // 13.30.14423
+{
+    Addresses::Client::setBaseAddress(baseAddress);
+    Addresses::Client::setLoggedIn(0x123C0A8 + baseAddress);
+    Addresses::Client::setDataPointer(Addresses::Client::getLoggedIn() + 0x1C);
+
+    Addresses::Client::setClientFocus({0x127C16C + baseAddress, 0x10, 0x20, 0x8});
 
     Addresses::Versions::setOffsetsA();
 }

@@ -113,8 +113,6 @@
     </property>
     <addaction name="actionPress_Kz_Key"/>
     <addaction name="actionInitial_Config"/>
-    <addaction name="separator"/>
-    <addaction name="actionv0_1_10_0"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>

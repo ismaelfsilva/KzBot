@@ -31,6 +31,11 @@ uint32_t KeyBinding::getKey(bool& extended)
     return Util::KzHelper::qtKeyToVK(key, extended);
 }
 
+void KeyBinding::setKey(uint32_t key)
+{
+    Util::KzHelper::WriteMemoryUInt32(Globals::getHandle(), m_id + 0x4, key);
+}
+
 Qt::KeyboardModifier KeyBinding::getModifier()
 {
     uint32_t keyData = Util::KzHelper::ReadMemoryUInt32(Globals::getHandle(), m_address + 0x10);

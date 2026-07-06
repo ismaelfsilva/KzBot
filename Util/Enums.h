@@ -14,7 +14,8 @@ enum class DelayType
     NpcFood,
     CupcakeHp,
     CupcakeMp,
-    Utamo
+    Utamo,
+    AttackSpell
 };
 
 enum class ActionType

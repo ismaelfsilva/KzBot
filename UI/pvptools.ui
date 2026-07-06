@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>438</width>
-    <height>479</height>
+    <width>401</width>
+    <height>432</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,99 +54,22 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="2">
-          <widget class="QPushButton" name="pushButton_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Key</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QCheckBox" name="checkBox_7">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Disintegrate</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="checkBox_10">
+         <item row="2" column="1">
+          <widget class="QPushButton" name="clearTileDest">
            <property name="enabled">
             <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>On Combo UE</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEdit">
-           <property name="enabled">
-            <bool>false</bool>
            </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
+             <horstretch>1</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="placeholderText">
-            <string>Flower Id</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="checkBox_11">
-           <property name="text">
-            <string>On Avatar Combo</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QCheckBox" name="checkBox_9">
-           <property name="enabled">
-            <bool>false</bool>
+           <property name="toolTip">
+            <string>Click this button then click at the desired destination position</string>
            </property>
            <property name="text">
-            <string>Use MWall</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="checkBox_2">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Go To</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBox_5">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Clear Tile</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QPushButton" name="pushButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Position</string>
+            <string>Destination Pos</string>
            </property>
           </widget>
          </item>
@@ -160,8 +83,8 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_8">
+         <item row="3" column="2">
+          <widget class="QCheckBox" name="checkBox_9">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -170,32 +93,13 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBox">
-           <property name="text">
-            <string>Hold Target</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QLineEdit" name="lineEdit_3">
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="checkBox_10">
            <property name="enabled">
             <bool>true</bool>
            </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="text">
-            <string/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="placeholderText">
-            <string>Spell Words / Item Id</string>
+            <string>On Combo UE</string>
            </property>
           </widget>
          </item>
@@ -222,12 +126,111 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QCheckBox" name="checkBox_4">
+          <widget class="QCheckBox" name="protSqmStatus">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="font">
+            <font>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>This option doesn't save</string>
+           </property>
+           <property name="text">
+            <string>Protect SQM</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QKeySequenceEdit" name="protSqmKey">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkBox_2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Go To</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="protSqmFlowerSource">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Click this button then click at the desired flower position</string>
+           </property>
+           <property name="text">
+            <string>Flower Pos</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QLineEdit" name="lineEdit_3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="placeholderText">
+            <string>Spell Words / Item Id</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QKeySequenceEdit" name="clearTileKey">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QCheckBox" name="checkBox_7">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Protect Friend</string>
+            <string>Use Disintegrate</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="checkBox_11">
+           <property name="text">
+            <string>On Avatar Combo</string>
            </property>
           </widget>
          </item>
@@ -274,6 +277,54 @@
             <string>Spell Words / Item Id</string>
            </property>
           </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="clearTileStatus">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="font">
+            <font>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>This option doesn't save</string>
+           </property>
+           <property name="text">
+            <string>Clear Tile</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBox">
+           <property name="text">
+            <string>Hold Target</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="comboStatus">
+           <property name="text">
+            <string>Combo</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="comboInput">
+           <property name="toolTip">
+            <string>Spell Words or Item Id; Separated by &quot;;&quot;</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="placeholderText">
+            <string>Spell Words / Item Ids</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QKeySequenceEdit" name="comboKey"/>
          </item>
         </layout>
        </widget>
@@ -443,12 +494,9 @@
   <tabstop>checkBox</tabstop>
   <tabstop>checkBox_2</tabstop>
   <tabstop>checkBox_3</tabstop>
-  <tabstop>checkBox_4</tabstop>
-  <tabstop>lineEdit</tabstop>
-  <tabstop>checkBox_8</tabstop>
-  <tabstop>checkBox_5</tabstop>
-  <tabstop>pushButton</tabstop>
-  <tabstop>pushButton_2</tabstop>
+  <tabstop>protSqmStatus</tabstop>
+  <tabstop>clearTileStatus</tabstop>
+  <tabstop>clearTileDest</tabstop>
   <tabstop>checkBox_6</tabstop>
   <tabstop>checkBox_7</tabstop>
   <tabstop>checkBox_9</tabstop>

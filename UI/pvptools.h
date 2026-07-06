@@ -15,6 +15,7 @@ public:
     explicit PvpTools(QWidget *parent = nullptr);
     ~PvpTools();
     Ui::PvpTools *ui;
+    bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result);
 
     void UpdateUi();
 private slots:
@@ -53,6 +54,20 @@ private slots:
     void on_lineEdit_4_textChanged(const QString &arg1);
 
     void on_lineEdit_5_textChanged(const QString &arg1);
+
+    void on_clearTileDest_clicked();
+
+    void on_protSqmFlowerSource_clicked();
+
+    void on_protSqmKey_editingFinished();
+
+    void on_clearTileKey_editingFinished();
+
+    void on_comboInput_textChanged(const QString &arg1);
+
+    void on_comboKey_editingFinished();
+
+    void on_comboStatus_stateChanged(int arg1);
 
 private:
 };

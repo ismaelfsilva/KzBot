@@ -28,6 +28,7 @@ private:
     static void setV132114172(uint32_t baseAddress);
     static void setV132214282(uint32_t baseAddress);
     static void setV132214366(uint32_t baseAddress);
+    static void setV133014423(uint32_t baseAddress);
 
     static void setOffsetsA();
     static void setOffsetsB();

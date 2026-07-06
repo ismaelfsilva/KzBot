@@ -160,6 +160,11 @@ void ToolsTab::ResetUi()
 {
     ui->lineEdit->setText("");
     ui->lineEdit_2->setText("");
+    ui->lineEdit_3->setText("");
+
+    ui->checkBox_3->setChecked(false);
+    ui->checkBox_5->setChecked(false);
+    ui->checkBox_4->setChecked(false);
 
     ui->antiParalyzeSpellInput->setText("");
     ui->hasteSpellInput->setText("");
@@ -221,17 +226,17 @@ void ToolsTab::UpdateUi()
 
     if (manaTrainSpell->spell != nullptr)
         ui->lineEdit->setText(QString::fromStdString(manaTrainSpell->spell->words));
-    ui->checkBox_5->setChecked(scriptConfig->getToolsEatFood());
+    ui->checkBox_5->setChecked(manaTrainSpell->enabled);
 
     // General
     ui->checkBox->setChecked(scriptConfig->getToolsAntiIdle());
     ui->checkBox_2->setChecked(scriptConfig->getToolsHoldPosition());
-    ui->checkBox_3->setChecked(scriptConfig->getToolsEatFood());
     if (scriptConfig->getToolsEatFoodId() > 0)
         ui->lineEdit_2->setText(QString::number(scriptConfig->getToolsEatFoodId()));
-    ui->checkBox_4->setChecked(scriptConfig->getToolsAutoBuff());
+    ui->checkBox_3->setChecked(scriptConfig->getToolsEatFood());
     if (scriptConfig->getToolsAutoBuffItemId() > 0)
         ui->lineEdit_3->setText(QString::number(scriptConfig->getToolsAutoBuffItemId()));
+    ui->checkBox_4->setChecked(scriptConfig->getToolsAutoBuff());
 
     updateReadInventory();
 }

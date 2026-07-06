@@ -28,6 +28,7 @@ public:
     void setUseType(ItemUseType useType);
     bool getSendAutomatically();
     void setSendAutomatically(bool automatically);
+    void setKey(uint32_t key);
 private:
     uint32_t m_id;
     uint32_t m_address;

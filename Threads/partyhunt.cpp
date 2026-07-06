@@ -262,7 +262,6 @@ void Threads::PartyHunt::m_threadFunc()
             if (!Game::canCast(rule->delayType1) || !Game::canCast(rule->delayType2))
                 continue;
 
-
             if (isItem)
             {
                 Input* itemInput = new Input();
@@ -336,6 +335,8 @@ void Threads::PartyHunt::m_threadFunc()
             cooldownGroupUsed[ruleSpell->group] = true;
             Game::increaseDelay(rule->delayType1);
             Game::increaseDelay(rule->delayType2);
+
+            rule->lastUse = Game::getGameTime();
         }
     }
     /*

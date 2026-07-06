@@ -47,7 +47,7 @@ public:
     ActionType type;
     ItemUseType itemUseType;
 
-    std::chrono::time_point<std::chrono::system_clock> lastUse = std::chrono::system_clock::now();
+    uint64_t lastUse = 0;
 
     bool isDefaultValue = true;
     bool Serialize(QXmlStreamWriter &writer);

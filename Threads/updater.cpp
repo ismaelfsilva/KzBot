@@ -63,7 +63,7 @@ void Threads::Updater::m_threadFunc()
                 QApplication::quit();
                 return;
             }
-            else if (Globals::getAuthTickCount() == 0 || (Globals::getAuthErrorCount() > 0 && Globals::getAuthTickCount() % 600 == 0) || Globals::getAuthTickCount() % 3000 == 0)
+            else if (Globals::getAuthTickCount() == 0 || (Globals::getAuthErrorCount() > 0 && Globals::getAuthTickCount() % 6000 == 0) || Globals::getAuthTickCount() % 30000 == 0)
             {
                 QUrl url("https://tibia.kzsoft.com.br/authenticate.php");
 
@@ -158,6 +158,15 @@ void Threads::Updater::m_threadFunc()
         if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
             Game::setLastTargetId(0);
 
+        /*
+        if (GetAsyncKeyState(VK_LBUTTON) & 1)
+        {
+            GetCursorPos(&Globals::getScriptConfig()->clearTileDestPoint);
+            ScreenToClient(GetForegroundWindow(), &Globals::getScriptConfig()->clearTileDestPoint);
+
+            break;
+        }
+*/
 
         // Updater
         if (scriptConfig->getGeneralStatus())
@@ -200,7 +209,7 @@ void Threads::Updater::m_threadFunc()
             }
         }
 
-        Sleep(100);
+        Sleep(10);
     }
 
     m_updaterThread.detach();
@@ -215,7 +224,7 @@ void Threads::Updater::m_actionThreadFunc()
         {
             if (Globals::getInputs().size() == 0)
             {
-                Sleep(10);
+                Sleep(1);
                 continue;
             }
 
@@ -228,12 +237,14 @@ void Threads::Updater::m_actionThreadFunc()
                 try
                 {
                     Input* input = *it;
+                    /*
                     if (!input->canRepeat && Game::getGameTime() != input->gameTime)
                     {
                         it = std::remove(Globals::getInputs().begin(), Globals::getInputs().end(), input);
                         Globals::getInputs().erase(it, Globals::getInputs().end());
                         continue;
                     }
+*/
 
                     botKey = Objects::Client::getKeyBindingByKey(VK_F13);
                     if (botKey == nullptr)
@@ -249,6 +260,7 @@ void Threads::Updater::m_actionThreadFunc()
                     {
                         if (scriptConfig->getPartyHuntUseTargetNext())
                         {
+                            Util::KzHelper::SendKey(VK_ESCAPE, false);
                             for (int i = 0; i < 100; i++)
                             {
                                 Util::KzHelper::SendKey(scriptConfig->getPartyHuntTargetNextKey(), scriptConfig->getPartyHuntTargetNextKeyExtended());
@@ -284,6 +296,7 @@ void Threads::Updater::m_actionThreadFunc()
 
                             Sleep(1);
                         }
+
                     }
                     else if (input->itemId > 0)
                     {
@@ -319,9 +332,22 @@ void Threads::Updater::m_actionThreadFunc()
                         }
                     }
 
-                    it = std::remove(Globals::getInputs().begin(), Globals::getInputs().end(), input);
-                    Globals::getInputs().erase(it, Globals::getInputs().end());
-                    //it = Globals::getInputs().begin();
+
+                    auto entry = Globals::getInputs().begin();
+                    while (entry != Globals::getInputs().end())
+                    {
+                        Input* entryInput = *entry;
+                        if ((input->itemId > 0 && entryInput->itemId == input->itemId) ||
+                            (input->text.length() > 0 && entryInput->text == input->text))
+                        {
+                            entry = Globals::getInputs().erase(entry);
+                        }
+                        else
+                        {
+                            ++entry;
+                        }
+                    }
+
                 }
                 catch (...)
                 {}

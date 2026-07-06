@@ -21,19 +21,26 @@ PartyHunt::PartyHunt(QWidget *parent) :
     // Target Rules
     ActionRule* ultimateSpell = scriptConfig->addTargetRule("ultimateSpell", ActionType::Spell, nullptr);
     scriptConfig->setPartyHuntUltimateHealth(ultimateSpell->maxCreatureHp);
+    ultimateSpell->delayType1 = DelayType::AttackSpell;
 
     ActionRule* areaSpell = scriptConfig->addTargetRule("areaSpell", ActionType::Spell, nullptr);
+    areaSpell->delayType1 = DelayType::AttackSpell;
 
     ActionRule* waveA = scriptConfig->addTargetRule("waveA", ActionType::Spell, nullptr);
     waveA->centerKnight = true;
+    waveA->delayType1 = DelayType::AttackSpell;
     ActionRule* waveB = scriptConfig->addTargetRule("waveB", ActionType::Spell, nullptr);
     waveB->centerKnight = true;
+    waveB->delayType1 = DelayType::AttackSpell;
     ActionRule* areaRune = scriptConfig->addTargetRule("areaRune", ActionType::Rune, "Avalanche Rune");
+    areaRune->delayType1 = DelayType::AttackSpell;
 
     ActionRule* singleTargetA = scriptConfig->addTargetRule("singleTargetA", ActionType::Rune, "Sudden Death Rune");
     singleTargetA->isDefaultValue = false;
+    singleTargetA->delayType1 = DelayType::AttackSpell;
     ActionRule* singleTargetB = scriptConfig->addTargetRule("singleTargetB", ActionType::Rune, "Sudden Death Rune");
     singleTargetB->isDefaultValue = false;
+    singleTargetB->delayType1 = DelayType::AttackSpell;
     ActionRule* msDebuff = scriptConfig->addTargetRule("msDebuff", ActionType::Spell, nullptr);
     msDebuff->centerKnight = true;
 

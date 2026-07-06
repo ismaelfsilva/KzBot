@@ -47,7 +47,6 @@ void Threads::PvPTools::m_threadFunc()
                 }
                 if (UECount >= scriptConfig->getUECountToConsiderCombo())
                 {
-                    std::cout << "combo ue" << std::endl;
                     lastComboUE = Game::getGameTime();
 
                     // Do Rules
@@ -97,7 +96,6 @@ void Threads::PvPTools::m_threadFunc()
                 }
                 if (avatarCount >= scriptConfig->getAvatarCountToConsiderCombo())
                 {
-                    std::cout << "avatar" << std::endl;
                     lastAvatarCombo = Game::getGameTime();
 
                     // Do Rules
@@ -167,7 +165,7 @@ void Threads::PvPTools::m_threadFunc()
                     {
                         Input* input = new Input();
 
-                        if (c->spell != nullptr && ((Game::isSpellOnCooldown(c->spell) && c->itemId != 35563) && c->spell->vocations[Game::getPlayerVocation()]))
+                        if (c->spell != nullptr && ((Game::isSpellOnCooldown(c->spell)) && c->spell->vocations[Game::getPlayerVocation()]))
                         {
                             delete input;
                             continue;

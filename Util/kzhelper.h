@@ -48,6 +48,8 @@ extern std::filesystem::path getWindowPath(HWND hwnd);
 extern uint32_t qtKeyToVK(uint32_t key, bool& extended);
 extern Qt::Key vkToQtKey(uint32_t vk);
 extern void SendKey(uint32_t key, bool extended = false);
+extern void DragDrop(int fromX, int fromY, int toX, int toY);
+extern void DragDrop(POINT* from, POINT* to);
 extern void LeftClick(int x, int y);
 extern void LeftClick(Point* p);
 extern void RightClick(int x, int y);

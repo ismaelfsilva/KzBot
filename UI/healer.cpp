@@ -64,10 +64,13 @@ Healer::Healer(QWidget *parent) :
 
     ActionRule* strongHealFriend = scriptConfig->addHealRule("strongHealFriend", ActionType::Spell, "exura gran sio");
     strongHealFriend->maxCreatureHp = (0);
+    strongHealFriend->delayType1 = DelayType::Heal;
 
     ActionRule* healFriend = scriptConfig->addHealRule("healFriend", ActionType::Spell, "exura sio");
+    healFriend->delayType1 = DelayType::Heal;
 
     ActionRule* uhRune = scriptConfig->addHealRule("uhRune", ActionType::Item, "ultimate healing rune");
+    uhRune->delayType1 = DelayType::Heal;
 
     ActionRule* mpPotion = scriptConfig->addHealRule("mpPotion", ActionType::Item, "ultimate mana potion");
     mpPotion->maxMp = 0;
@@ -627,11 +630,6 @@ void Healer::on_avatarHp_textChanged(const QString &arg1)
     rule->isDefaultValue = false;
 
     rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
-
-    if (rule->maxHp == 0)
-        rule->maxHp = 100;
-    if (rule->maxMp == 0)
-        rule->maxMp = 100;
 }
 
 
@@ -643,11 +641,6 @@ void Healer::on_avatarMp_textChanged(const QString &arg1)
     rule->isDefaultValue = false;
 
     rule->enabled = rule->maxHp > 0 || rule->maxMp > 0;
-
-    if (rule->maxHp == 0)
-        rule->maxHp = 100;
-    if (rule->maxMp == 0)
-        rule->maxMp = 100;
 }
 
 std::map<std::string, bool> isManaFood = {

@@ -414,6 +414,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionPress_Kz_Key_triggered()
 {
+    std::cout << std::hex << Objects::Client::getKeyBindingByKey(VK_F13)->getAddress() << std::endl;
     Util::KzHelper::SendKey(VK_F13);
 }
 

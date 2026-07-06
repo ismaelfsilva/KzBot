@@ -62,11 +62,10 @@ void Threads::Tools::m_threadFunc()
         }
 
         // Auto Eat Food
-        //static uint64_t lastEatFoodTime = 0;
+        static uint64_t lastEatFoodTime = 0;
         if (scriptConfig->getToolsEatFood())
         {
-            //if (Game::getGameTime() - lastEatFoodTime > 120 * 1000)
-            if (Game::getPlayerIsHungry())
+            if (Game::getPlayerIsHungry() && Game::getGameTime() - lastEatFoodTime > 2000)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -78,7 +77,7 @@ void Threads::Tools::m_threadFunc()
                     Globals::addInput(itemInput);
                 }
 
-                //lastEatFoodTime = Game::getGameTime();
+                lastEatFoodTime = Game::getGameTime();
             }
         }
 
@@ -121,17 +120,18 @@ void Threads::Tools::m_threadFunc()
             if (rule->type == ActionType::Equip)
             {
                 // Amulets
-                if (rule->name == "stoneSkinAmuletEquip" && (Game::getAmuletId() == rule->spell->itemId) == ((rule->maxHp != 0 && playerHp <= rule->maxHp) || (rule->maxMp != 0 && playerMp <= rule->maxMp)))
+                if (rule->name == "stoneSkinAmuletEquip" && (rule->spell == nullptr || (Game::getAmuletId() == rule->spell->itemId) == ((rule->maxHp != 0 && playerHp <= rule->maxHp) || (rule->maxMp != 0 && playerMp <= rule->maxMp))))
                     continue;
                 else if (rule->name == "defaultAmuletEquip" && Game::getAmuletId() != 0)
                     continue;
+
 
                 // Rings
                 else if (rule->name == "energyRingEquip" && (Game::getRingId() == 3088) && (playerHp <= rule->maxHp && playerMp >= rule->minMp))
                     continue;
                 else if (rule->name == "energyRingEquip" && (Game::getRingId() != 3088) && (playerHp > rule->maxHp || playerMp < rule->minMp))
                     continue;
-                else if (rule->name == "mightRingEquip" && (Game::getRingId() == 3088 || (Game::getRingId() == rule->spell->itemId) == ((rule->maxHp != 0 && playerHp <= rule->maxHp) || (rule->maxMp != 0 && playerMp <= rule->maxMp))))
+                else if (rule->name == "mightRingEquip" && (rule->spell == nullptr || (Game::getRingId() == 3088 || (Game::getRingId() == rule->spell->itemId) == ((rule->maxHp != 0 && playerHp <= rule->maxHp) || (rule->maxMp != 0 && playerMp <= rule->maxMp)))))
                     continue;
                 else if (rule->name == "defaultRingEquip" && Game::getRingId() != 0)
                     continue;
@@ -143,6 +143,9 @@ void Threads::Tools::m_threadFunc()
                 continue;
 
             if (rule->onParalyzeSpell && !Game::getPlayerHasStatus(Icons::ICON_PARALYZE))
+                continue;
+
+            if (Game::getGameTime() - rule->lastUse < scriptConfig->minAntiSpamDelay)
                 continue;
 
             if (rule->type == ActionType::Equip)
@@ -176,8 +179,12 @@ void Threads::Tools::m_threadFunc()
 
                 // CHECK IF HAS DURATION, THEN SET SPELL COOLDOWN TO DURATION
                 cooldownGroupUsed[ruleSpell->group] = true;
+
+                Game::increaseDelay(rule->delayType1);
+                Game::increaseDelay(rule->delayType2);
             }
 
+            rule->lastUse = Game::getGameTime();
         }
     }
     /*

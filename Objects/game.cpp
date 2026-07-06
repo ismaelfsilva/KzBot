@@ -149,14 +149,14 @@ void Game::Update()
 
     // Game Data
     m_gamePing = Client::getPing(m_dataPointer);
-    m_gameTime = m_playerCreature->getGameTime() + m_gamePing;
+    m_gameTime = m_playerCreature->getGameTime();
 
     delete m_playerCreature;
 
     // Update Groups Cooldown
     for (Cooldown* cd : Client::getCooldownGroups(m_dataPointer))
     {
-        m_cooldownGroups[cd->id()] = cd->endTime();
+        m_cooldownGroups[(uint8_t)cd->id()] = cd->endTime();
         delete cd;
     }
 

@@ -49,7 +49,7 @@ public:
     static int getDataPointer() { return m_dataPointer; }
 
     static bool isSpellOnCooldown(Spell* spell) {
-        return (spell->id != 0 && (m_cooldownGroups[(int)spell->group] > 0 || m_cooldownSpells[spell->id] > m_gameTime));
+        return (spell->id != 0 && (m_cooldownGroups[(int)spell->group] > 0 || m_cooldownSpells[spell->id] > m_gameTime - m_gamePing * 2));
     };
 
     static uint64_t getSpellLastCooldownEnd(Spell* spell) {
@@ -88,6 +88,7 @@ public:
     static CachedHotkey getHotkey(int itemId);
 
     static uint64_t getGameTime() { return m_gameTime; };
+    static uint64_t getGamePing() { return m_gamePing; };
     static CachedCreature getFriendToHeal() { return m_friendToHeal; };
     static CachedCreature getPartyKnight() { return m_partyKnight; };
     static CachedCreature getClosestCreature() { return m_closestCreature; };
